@@ -6,15 +6,15 @@ import os
 import time
 import math as m
 import numpy as np
-import ambf_raven as arav
+# import ambf_raven as arav
 import physical_raven as prav
 import csv
-import ambf_raven_def as ard
+import physical_raven_def as ard
 import ambf_xbox_controller as axc
 import ambf_xbox_controller_fake as axf
 import ambf_raven_recorder as arr
 import ambf_raven_reader as arc
-import ambf_raven_grasping as arg
+# import ambf_raven_grasping as arg
 
 '''
 authors: Natalie Chalfant, Sean Fabrega
@@ -88,7 +88,7 @@ def update_pos_two_arm(controller):
     # Set gripper angles
     gangle[0] = 1 - (controller[0][2] / 4)
     # for the right arm gangle needs to be negative, this is to fix a bug somewhere else that I can't find
-    gangle[1] = -1 + (controller[1][2] / 4)
+    gangle[1] = 1 - (controller[1][2] / 4)
 
     return delta_tm, gangle
 
@@ -236,6 +236,7 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
             X button: revert left arm gripper to its home position
             Y button: revert right arm gripper to its home position
             '''
+            time.sleep(1)
             # Use recorded controller inputs or realtime controller inputs
             if CONTROL[3]:
                 if reader.get_status():
@@ -563,7 +564,8 @@ def main():
     # create reader instance
     reader = arc.ambf_raven_reader()
     # create grasper instance
-    grasper = arg.ambf_raven_grasping()
+    # grasper = arg.ambf_raven_grasping()
+    grasper = None
 
     # set raven man_steps
     raven.man_steps = 17

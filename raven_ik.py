@@ -1,4 +1,4 @@
-from ambf_raven_def import *
+from physical_raven_def import *
 from raven_fk import fwd_kinematics, fwd_trans, joint_to_dhvalue
 import math as m
 import numpy as np
