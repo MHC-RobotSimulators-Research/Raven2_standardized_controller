@@ -189,7 +189,7 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
     # Sets which mode will be used in manual control
     arm_control = [True, True]
     # True for p5 ik and false for standard ik
-    ik_mode = False
+    ik_mode = True
     # Current DH values for each arm, defaults to home position
     curr_dh = np.array([[1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., 0., 0.52359878],
                         [1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., -0., 0.52359878]],
@@ -236,7 +236,7 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
             X button: revert left arm gripper to its home position
             Y button: revert right arm gripper to its home position
             '''
-            time.sleep(1)
+            # time.sleep(1)
             # Use recorded controller inputs or realtime controller inputs
             if CONTROL[3]:
                 if reader.get_status():
