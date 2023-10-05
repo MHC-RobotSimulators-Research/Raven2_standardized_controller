@@ -47,7 +47,8 @@ import raven_fk as fk
 import raven_ik as ik 
 import ambf_raven_def as ard
 
-class raven2_arm():
+
+class physical_raven2_arm():
 
     # ros node is not initialized here, it should be initialized and named by the program that use this controller
     def __init__(self, name_space, robot_name, grasper_name):
