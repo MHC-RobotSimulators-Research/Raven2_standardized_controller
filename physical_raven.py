@@ -23,8 +23,8 @@ class physical_raven:
 
         self.arm_ctl_l = raven2_arm(name_space = ' ', robot_name = 'arm1', grasper_name = 'grasp1')
         self.arm_ctl_r = raven2_arm(name_space = ' ', robot_name = 'arm2', grasper_name = 'grasp2')
-
         self.arms = [self.arm_ctl_l, self.arm_ctl_r]
+        self.raven_type = True
 
         self.start_jp = np.zeros((2, 7))  # indexed at 0
         self.delta_jp = np.zeros((2, 7))

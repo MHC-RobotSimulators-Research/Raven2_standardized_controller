@@ -28,6 +28,7 @@ class ambf_raven:
             link_names = self.arms[i].get_children_names()
             for j in range(self.arms[i].get_num_of_children()):
                 self.links.append(self._client.get_obj_handle('raven_2/' + link_names[j]))
+        self.raven_type = False
 
         self.start_jp = np.zeros((2, 7))  # indexed at 0
         self.delta_jp = np.zeros((2, 7))
@@ -54,6 +55,9 @@ class ambf_raven:
         self.home_fast()
         self.set_curr_tm()
         print(self.curr_tm)
+
+    def get_raven_type(self):
+        return self.raven_type
 
     def set_curr_tm(self):
         for i in range(len(self.arms)):
@@ -265,16 +269,14 @@ class ambf_raven:
             home_dh (array) : array containing home position, or desired postion of the
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
-        # curr_jp = np.array(self.arms[arm].get_all_joint_pos(), dtype="float")
+        if arm == 1:
+            gangle = -gangle
+
         self.start_jp[arm] = self.next_jp[arm]
         if p5:
             curr_tm = fk.fwd_kinematics_p5(arm, self.start_jp[arm])
         else:
             curr_tm = fk.fwd_kinematics(arm, self.start_jp[arm])
-        # print("initial tm :", curr_tm)
-        # curr_tm[0, 3] += x
-        # curr_tm[1, 3] += y
-        # curr_tm[2, 3] += z
         curr_tm += tm
         if p5:
             jpl = ik.inv_kinematics_p5(arm, curr_tm, gangle, home_dh)
@@ -298,6 +300,9 @@ class ambf_raven:
             home_dh (array) : array containing home position, or desired postion of the
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
+        if arm == 1:
+            gangle = -gangle
+
         self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] += tm
         print(self.curr_tm[arm])
