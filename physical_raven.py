@@ -53,6 +53,7 @@ class physical_raven:
         self.set_curr_tm()
         print(self.curr_tm)
         print(self.start_jp)
+        self.resume()
 
     def resume(self):
         self.arm_ctl_l.pub_state_command('resume')
@@ -65,9 +66,12 @@ class physical_raven:
     def set_curr_tm(self):
         for i in range(len(self.arms)):
             self.start_jp[i] = self.arms[i].get_measured_jpos()
+            self.next_jp[i] = self.start_jp[i]
             self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i])
 
     def home_fast(self):
+
+        self.set_curr_tm()
 
         self.next_jp = [self.home_joints, self.home_joints]
         self.move()
@@ -310,7 +314,7 @@ class physical_raven:
         """
         self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] += tm
-        print(self.curr_tm[arm])
+        print("curr_tm: ", self.curr_tm[arm])
         if p5:
             jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh)
         else:
@@ -319,8 +323,10 @@ class physical_raven:
         if self.limited[arm]:
             print("Desired cartesian position is out of bounds for Raven2. Will move to max pos.")
         new_jp = jpl[0]
-        print(new_jp)
         self.next_jp[arm] = new_jp
+        print("next_jp: ", self.next_jp)
+        print("start_jp: ", self.start_jp)
+
 
     def calc_increment(self, arm):
         """
@@ -335,7 +341,7 @@ class physical_raven:
         #     self.delta_jp[arm][i] = self.next_jp[arm][i] - self.arms[arm].get_joint_pos(i)
 
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
-        print(self.delta_jp[arm])
+        print("arm", arm, " delta_jp: ", self.delta_jp[arm])
 
 
         # Find safe increment
@@ -357,12 +363,12 @@ class physical_raven:
         scale = 1 / increments
         for i in range(len(self.arms)):
             self.jr[i] = scale * self.delta_jp[i]
-            print(self.jr[i])
+            # print(self.jr[i])
 
         for i in range(increments):
             self.arms[0].pub_jr_command(self.arms[0].seven2sixteen(self.jr[0]))
             self.arms[1].pub_jr_command(self.arms[1].seven2sixteen(self.jr[1]))
-            time.sleep(prd.COMMAND_TIME)
+            # time.sleep(prd.COMMAND_TIME)
 
     # def move_now(self, arm):
     #     """
