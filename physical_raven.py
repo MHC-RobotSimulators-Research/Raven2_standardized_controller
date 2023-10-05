@@ -6,7 +6,7 @@ import utilities as u
 import numpy as np
 import rospy
 import physical_raven_def as prd
-from raven_arm import raven2_arm
+from physical_raven_arm import raven2_arm
 import timeit
 
 
