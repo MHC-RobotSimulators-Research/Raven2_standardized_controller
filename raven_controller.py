@@ -396,6 +396,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             raven.sine_dance()
 
     print("shutting down...\n")
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, FILE_DESCRIPTORS)
     os.system('kill %d' % os.getpid())
     exit(0)
 
