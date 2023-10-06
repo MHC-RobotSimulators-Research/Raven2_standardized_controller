@@ -55,6 +55,9 @@ class physical_raven:
         print(self.start_jp)
         self.resume()
 
+    def get_raven_type(self):
+        return self.raven_type
+
     def resume(self):
         self.arm_ctl_l.pub_state_command('resume')
         self.arm_ctl_r.pub_state_command('resume')
