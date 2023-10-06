@@ -6,14 +6,22 @@ import os
 import time
 import math as m
 import numpy as np
-import ambf_raven as arav
 import csv
-import ambf_raven_def as ard
+import physical_raven_def as ard
 import ambf_xbox_controller as axc
 import ambf_xbox_controller_fake as axf
 import ambf_raven_recorder as arr
 import ambf_raven_reader as arc
-import ambf_raven_grasping as arg
+
+AMBF_RAVEN = True
+PHYSICAL_RAVEN = False
+
+if AMBF_RAVEN:
+    import ambf_raven as arav
+    import ambf_raven_grasping as arg
+
+if PHYSICAL_RAVEN:
+    import physical_raven as prav
 
 '''
 authors: Natalie Chalfant, Sean Fabrega
@@ -83,11 +91,8 @@ def update_pos_two_arm(controller):
                 delta_tm[arm][1, 3] = -controller[arm][0] / DIV
             if DEADZONE < abs(controller[arm][1]):
                 delta_tm[arm][0, 3] = -controller[arm][1] / DIV
-
-    # Set gripper angles
-    gangle[0] = 1 - (controller[0][2] / 4)
-    # for the right arm gangle needs to be negative, this is to fix a bug somewhere else that I can't find
-    gangle[1] = -1 + (controller[1][2] / 4)
+        # Set gripper angles
+        gangle[arm] = 1 - (controller[arm][2] / 4)
 
     return delta_tm, gangle
 
@@ -117,17 +122,17 @@ def update_pos_one_arm(controller, arm, curr_dh):
 
     # Cartesian control of desired arm
     if controller[0][3] == 1 and DEADZONE < abs(controller[0][1]):
-        pos[2][arm] = -controller[0][1] / DIV
+        delta_tm[arm][2, 3] = -controller[0][1] / DIV
     else:
         if DEADZONE < abs(controller[0][0]):
-            pos[1][arm] = -controller[0][0] / DIV
+            delta_tm[arm][1, 3] = -controller[0][0] / DIV
         if DEADZONE < abs(controller[0][1]):
-            pos[0][arm] = -controller[0][1] / DIV
+            delta_tm[arm][0, 3] = -controller[0][1] / DIV
 
     # Left arm
     if not arm:
         # Set left gripper angle
-        pos[3][0] = 1 - (controller[1][2] / 4)
+        gangle[0] = 1 - (controller[1][2] / 4)
 
         # Set right j4
         if DEADZONE < abs(controller[1][0]):
@@ -141,7 +146,7 @@ def update_pos_one_arm(controller, arm, curr_dh):
     # Right arm
     else:
         # Set right gripper angle
-        pos[3][1] = -1 + (controller[1][2] / 4)
+        gangle[1] = 1 - (controller[1][2] / 4)
 
         # Set right j4
         if DEADZONE < abs(controller[1][0]):
@@ -152,7 +157,7 @@ def update_pos_one_arm(controller, arm, curr_dh):
             if abs(curr_dh[1][4] + controller[1][1] / 10) < 2:
                 curr_dh[1][4] += controller[1][1] / 10
 
-    return pos, curr_dh
+    return delta_tm, gangle, curr_dh
 
 
 def rumble_if_limited(raven, xbc):
@@ -170,13 +175,13 @@ def rumble_if_limited(raven, xbc):
         xbc.rumble(rumble[0], rumble[1], 100)
 
 
-def do(raven, xbc, grasper, recorder=None, reader=None):
+def do(ravens, xbc, grasper, recorder=None, reader=None):
     """
     performs the main actions of the robot based on the values
     in the control array
 
     Args:
-        raven : an ambf_raven instance
+        ravens : an array of raven objects
         xbc : an ambf_xbox_controller instance
         grasper : an ambf_raven_grasping instance
     """
@@ -188,7 +193,7 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
     # Sets which mode will be used in manual control
     arm_control = [True, True]
     # True for p5 ik and false for standard ik
-    ik_mode = False
+    ik_mode = True
     # Current DH values for each arm, defaults to home position
     curr_dh = np.array([[1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., 0., 0.52359878],
                         [1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., -0., 0.52359878]],
@@ -200,8 +205,9 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
             '''
             Homing Mode:
             '''
-            raven.home_fast()
-            control_reset()
+            for raven in ravens:
+                ravens[raven].home_fast()
+                control_reset()
 
         if CONTROL[2] and xbc is None:
             print("No xbox controller detected\n"
@@ -235,6 +241,7 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
             X button: revert left arm gripper to its home position
             Y button: revert right arm gripper to its home position
             '''
+            # time.sleep(1)
             # Use recorded controller inputs or realtime controller inputs
             if CONTROL[3]:
                 if reader.get_status():
@@ -266,20 +273,22 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
                 break
 
             # Record controller inputs and jpos
-            if RECORD:
-                if RECORDING:
-                    recorder.write_raven_status(raven)
-                    recorder.write_controller_inputs(controller)
+            for raven in range(len(ravens)):
 
-                else:
-                    recorder.record_raven_status()
-                    recorder.record_controller_inputs()
-                    recorder.write_raven_status(raven)
-                    recorder.write_controller_inputs(controller)
-                    RECORDING = True
-            elif RECORDING:
-                recorder.stop_recording(FILE_OUT)
-                RECORDING = False
+                if RECORD:
+                    if RECORDING:
+                        recorder.write_raven_status(ravens[raven])
+                        recorder.write_controller_inputs(controller)
+
+                    else:
+                        recorder.record_raven_status()
+                        recorder.record_controller_inputs()
+                        recorder.write_raven_status(raven)
+                        recorder.write_controller_inputs(controller)
+                        RECORDING = True
+                elif RECORDING:
+                    recorder.stop_recording(FILE_OUT)
+                    RECORDING = False
 
             # Set which control mode to use
             if controller[2][4] and controller[2][5]:
@@ -310,42 +319,45 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
             if controller[2][3]:
                 curr_dh[1] = ard.HOME_DH[1]
 
-            # Control both raven arms
-            if arm_control[0] and arm_control[1]:
-                # modify position using controller inputs
-                delta_tm, gangle = update_pos_two_arm(controller)
-                # Plan next move based off of modified cartesian coordinates
-                raven.plan_move_abs(0, delta_tm[0], gangle[0], ik_mode, curr_dh)
-                raven.plan_move_abs(1, delta_tm[1], gangle[1], ik_mode, curr_dh)
+            for raven in range(len(ravens)):
+                # Control both raven arms
+                if arm_control[0] and arm_control[1]:
+                    # modify position using controller inputs
+                    delta_tm, gangle = update_pos_two_arm(controller)
+                    # Plan next move based off of modified cartesian coordinates
+                    ravens[raven].plan_move_abs(0, delta_tm[0], gangle[0], ik_mode, curr_dh)
+                    ravens[raven].plan_move_abs(1, delta_tm[1], gangle[1], ik_mode, curr_dh)
 
-                try:
-                    for i in range(2):
-                        grasper.set_grasp(i, controller[i][2])
-                        grasper.grasp_object(i)
-                except AttributeError:
-                    pass
+                    if not ravens[raven].get_raven_type():
+                        try:
+                            for i in range(2):
+                                grasper.set_grasp(i, controller[i][2])
+                                grasper.grasp_object(i)
+                        except AttributeError:
+                            pass
 
-            # Control one raven arm
-            elif arm_control[0] or arm_control[1]:
-                # Decide which arm to control
-                arm = 0
-                if arm_control[1]:
-                    arm = 1
-                # modify position using controller inputs
-                pos, curr_dh = update_pos_one_arm(controller,arm, curr_dh)
-                # Plan new position based off of desired cartesian changes
-                raven.plan_move(arm, pos[0][arm], pos[1][arm], pos[2][arm], pos[3][arm], True, curr_dh)
+                # Control one raven arm
+                elif arm_control[0] or arm_control[1]:
+                    # Decide which arm to control
+                    arm = 0
+                    if arm_control[1]:
+                        arm = 1
+                    # modify position using controller inputs
+                    delta_tm, gangle, curr_dh = update_pos_one_arm(controller,arm, curr_dh)
+                    # Plan new position based off of desired cartesian changes
+                    ravens[raven].plan_move(arm, delta_tm[arm], gangle[arm], True, curr_dh)
 
-                try:
-                    grasper.set_grasp(arm, controller[1][2])
-                    grasper.grasp_object(arm)
-                except AttributeError:
-                    pass
+                    if not ravens[raven].get_raven_type():
+                        try:
+                            grasper.set_grasp(arm, controller[1][2])
+                            grasper.grasp_object(arm)
+                        except AttributeError:
+                            pass
 
-            # Incrementally move the simulated raven to the new planned position
-            raven.move()
-            # rumble the controller when raven is limited
-            rumble_if_limited(raven, xbc)
+                # Incrementally move the simulated raven to the new planned position
+                ravens[raven].move()
+                # rumble the controller when raven is limited
+                rumble_if_limited(ravens[raven], xbc)
 
         while CONTROL[3] and not CONTROL[2]:
             '''
@@ -353,42 +365,29 @@ def do(raven, xbc, grasper, recorder=None, reader=None):
             moves raven along a trajectory defined by a .csv function with 7 columns for each
             joint position in the desired movement
             '''
-            # if ard.RECORD_FLAG:
-            #     with open(ard.TO_FILE, 'wb') as file:
-            #         writer = csv.writer(file)
-            #         line = raven.get_raven_status(0,True)
-            #         writer.writerow(line)
-            #         start = time.time()
-            #
-            #         while not raven.finished:
-            #             curr_time = time.time() - start
-            #             if int(curr_time * 1000) >= csvData.shape[0]:
-            #                 raven.finished = True
-            #                 print("Raven has completed set trajectory")
-            #                 break
-            #             raven.set_raven_pos(csvData[int(curr_time * 1000)])
-            #             line = raven.get_raven_status(int(curr_time * 1000))
-            #             writer.writerow(line)
-            # else:
+            reader.load_csv(FILE_IN, "jpos")
+            start_time = time.time()
+            csv_start_time = None
 
-            if RECORD:
-                recorder.start_recording(FILE_OUT)
-                recorder.write_raven_status(raven, True)
+            while reader.get_status():
+                csv_time, jpos = reader.read_jp()
 
-            start = time.time()
-            while not raven.finished:
-                if RECORD:
-                    recorder.write_raven_status(raven)
-                curr_time = time.time() - start
-                if int(curr_time * 50) >= csvData.shape[0]:
-                    raven.finished = True
-                    print("Raven has completed set trajectory")
-                    break
-                raven.set_raven_pos(csvData[int(curr_time * 50)])
-                time.sleep(0.005)
-                print(curr_time)
+                if csv_start_time is None:
+                    csv_start_time = csv_time
 
-            recorder.stop_recording()
+                else:
+                    curr_time = time.time() - start_time
+                    curr_csv_time = csv_time - csv_start_time
+                    delta_time = curr_csv_time - curr_time
+                    if 0 < delta_time:
+                        time.sleep(delta_time)
+                        print("I AM SPEED")
+
+                for raven in ravens:
+                    ravens[raven].set_raven_pos(jpos)
+
+            # When finished reset control
+            control_reset()
 
         while CONTROL[4]:
             '''
@@ -550,21 +549,30 @@ def main():
     calling the do() method to move the robot according to what the user inputs
     """
 
+    global AMBF_RAVEN
+    global PHYSICAL_RAVEN
     global ALLOW_FAKE_CONTROLLER
 
     # load external raven trajectory file
-    file_valid, csvData = file_loader()
-    # creates raven object
-    raven = arav.ambf_raven()
+    # file_valid, csvData = file_loader()
+
+    ravens = []
+
+    # setup ambf raven
+    if AMBF_RAVEN:
+        ravens.append(arav.ambf_raven())
+        grasper = arg.ambf_raven_grasping()
+    else:
+        grasper = None
+
+    # setup physical raven
+    if PHYSICAL_RAVEN:
+        ravens.append(prav.physical_raven())
+
     # create recorder instance
     recorder = arr.ambf_raven_recorder()
     # create reader instance
     reader = arc.ambf_raven_reader()
-    # create grasper instance
-    grasper = arg.ambf_raven_grasping()
-
-    # set raven man_steps
-    raven.man_steps = 17
 
     # creates xbox controller object if there is a controller connected
     try:
@@ -581,7 +589,7 @@ def main():
     get_inputs = th.Thread(target=_get_input, args=(), daemon=True)
     # starts get_inputs thread
     get_inputs.start()
-    do(raven, xbc, grasper, recorder, reader)
+    do(ravens, xbc, grasper, recorder, reader)
     get_inputs.join()
 
 

@@ -68,6 +68,6 @@ RAVEN_T_CB         = np.matrix([[0.0, 1.0, 0.0, 0.0],[-1.0, 0.0, 0.0, 0.0],[0.0,
 
 # Parameters for the file mode
 COL_IN_FILE = 16              # the number of columns in the FROM FILE is 16
-FROM_FILE = "ravenpath.csv"   # path to the csv file with desired raven trajectory
+FROM_FILE = "ravenpath.csv"  # path to the csv file with desired raven trajectory
 TO_FILE = "raven_state_record.csv"     # path to the csv file where the actual raven trajectory is saved to
 RECORD_FLAG = False           # this flag determines whether ambf raven states are recorded

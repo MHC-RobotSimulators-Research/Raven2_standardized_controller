@@ -28,6 +28,7 @@ class ambf_raven:
             link_names = self.arms[i].get_children_names()
             for j in range(self.arms[i].get_num_of_children()):
                 self.links.append(self._client.get_obj_handle('raven_2/' + link_names[j]))
+        self.raven_type = False
 
         self.start_jp = np.zeros((2, 7))  # indexed at 0
         self.delta_jp = np.zeros((2, 7))
@@ -55,12 +56,13 @@ class ambf_raven:
         self.set_curr_tm()
         print(self.curr_tm)
 
+    def get_raven_type(self):
+        return self.raven_type
+
     def set_curr_tm(self):
         for i in range(len(self.arms)):
-            for j in range(self.raven_joints):
-                self.start_jp[i][j] = self.arms[i].get_joint_pos(j)
-
-            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i])
+            self.start_jp[i] = self.arms[i].get_all_joint_pos()
+            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], ard)
 
     def home_fast(self):
 
@@ -254,34 +256,30 @@ class ambf_raven:
             elif i == 15:
                 self.arms[1].set_joint_effort(i - 9, (np.deg2rad(pos_list[i]) - math.pi / 12) / scale)
 
-    def plan_move(self, arm, tm, gangle, p5=False, home_dh=ard.HOME_DH):
+    def plan_move(self, arm, delta_tm, gangle, p5=False, home_dh=ard.HOME_DH):
         """
         moves the desired robot arm based on inputted changes to cartesian coordinates
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
-            x (float) : the desired change to the x coordinate
-            y (float) : the desired change to the y coordinate
-            z (float) : the desired change to the z coordinate
+            delta_tm (numpy.array) : desired transformation matrix changes
             gangle (float) : the gripper angle, 0 is closed
             p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
             home_dh (array) : array containing home position, or desired postion of the
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
-        # curr_jp = np.array(self.arms[arm].get_all_joint_pos(), dtype="float")
+        if arm == 1:
+            gangle = -gangle
+
         self.start_jp[arm] = self.next_jp[arm]
         if p5:
-            curr_tm = fk.fwd_kinematics_p5(arm, self.start_jp[arm])
+            curr_tm = fk.fwd_kinematics_p5(arm, self.start_jp[arm], ard)
         else:
-            curr_tm = fk.fwd_kinematics(arm, self.start_jp[arm])
-        # print("initial tm :", curr_tm)
-        # curr_tm[0, 3] += x
-        # curr_tm[1, 3] += y
-        # curr_tm[2, 3] += z
-        curr_tm += tm
+            curr_tm = fk.fwd_kinematics(arm, self.start_jp[arm], ard)
+        curr_tm += delta_tm
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, curr_tm, gangle, home_dh)
+            jpl = ik.inv_kinematics_p5(arm, curr_tm, gangle, home_dh, ard)
         else:
-            jpl = ik.inv_kinematics(arm, curr_tm, gangle)
+            jpl = ik.inv_kinematics(arm, curr_tm, gangle, ard)
         self.limited[arm] = jpl[1]
         # print("new jp: ", jpl)
         if self.limited[arm]:
@@ -294,19 +292,22 @@ class ambf_raven:
         Plans a move using the absolute cartesian position
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
-            tm (numpy.array) : desired transformation matrix
+            tm (numpy.array) : desired transformation matrix changes
             gangle (float) : the gripper angle, 0 is closed
             p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
             home_dh (array) : array containing home position, or desired postion of the
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
+        if arm == 1:
+            gangle = -gangle
+
         self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] += tm
         print(self.curr_tm[arm])
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh)
+            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, ard)
         else:
-            jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle)
+            jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle, ard)
         self.limited[arm] = jpl[1]
         if self.limited[arm]:
             print("Desired cartesian position is out of bounds for Raven2. Will move to max pos.")
