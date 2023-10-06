@@ -303,7 +303,7 @@ class ambf_raven:
 
         self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] += tm
-        print(self.curr_tm[arm])
+        # print(self.curr_tm[arm])
         if p5:
             jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, ard)
         else:

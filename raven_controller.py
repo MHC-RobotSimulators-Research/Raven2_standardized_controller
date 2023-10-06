@@ -206,7 +206,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             Homing Mode:
             '''
             for raven in ravens:
-                ravens[raven].home_fast()
+                raven.home_fast()
                 control_reset()
 
         if CONTROL[2] and xbc is None:
@@ -273,22 +273,22 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                 break
 
             # Record controller inputs and jpos
-            for raven in range(len(ravens)):
+            for raven in ravens:
+                if not raven.get_raven_type():
+                    if RECORD:
+                        if RECORDING:
+                            recorder.write_raven_status(raven)
+                            recorder.write_controller_inputs(controller)
 
-                if RECORD:
-                    if RECORDING:
-                        recorder.write_raven_status(ravens[raven])
-                        recorder.write_controller_inputs(controller)
-
-                    else:
-                        recorder.record_raven_status()
-                        recorder.record_controller_inputs()
-                        recorder.write_raven_status(raven)
-                        recorder.write_controller_inputs(controller)
-                        RECORDING = True
-                elif RECORDING:
-                    recorder.stop_recording(FILE_OUT)
-                    RECORDING = False
+                        else:
+                            recorder.record_raven_status()
+                            recorder.record_controller_inputs()
+                            recorder.write_raven_status(raven)
+                            recorder.write_controller_inputs(controller)
+                            RECORDING = True
+                    elif RECORDING:
+                        recorder.stop_recording(FILE_OUT)
+                        RECORDING = False
 
             # Set which control mode to use
             if controller[2][4] and controller[2][5]:
@@ -319,16 +319,16 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             if controller[2][3]:
                 curr_dh[1] = ard.HOME_DH[1]
 
-            for raven in range(len(ravens)):
+            for raven in ravens:
                 # Control both raven arms
                 if arm_control[0] and arm_control[1]:
                     # modify position using controller inputs
                     delta_tm, gangle = update_pos_two_arm(controller)
                     # Plan next move based off of modified cartesian coordinates
-                    ravens[raven].plan_move_abs(0, delta_tm[0], gangle[0], ik_mode, curr_dh)
-                    ravens[raven].plan_move_abs(1, delta_tm[1], gangle[1], ik_mode, curr_dh)
+                    raven.plan_move_abs(0, delta_tm[0], gangle[0], ik_mode, curr_dh)
+                    raven.plan_move_abs(1, delta_tm[1], gangle[1], ik_mode, curr_dh)
 
-                    if not ravens[raven].get_raven_type():
+                    if not raven.get_raven_type():
                         try:
                             for i in range(2):
                                 grasper.set_grasp(i, controller[i][2])
@@ -345,9 +345,9 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                     # modify position using controller inputs
                     delta_tm, gangle, curr_dh = update_pos_one_arm(controller,arm, curr_dh)
                     # Plan new position based off of desired cartesian changes
-                    ravens[raven].plan_move(arm, delta_tm[arm], gangle[arm], True, curr_dh)
+                    raven.plan_move(arm, delta_tm[arm], gangle[arm], True, curr_dh)
 
-                    if not ravens[raven].get_raven_type():
+                    if not raven.get_raven_type():
                         try:
                             grasper.set_grasp(arm, controller[1][2])
                             grasper.grasp_object(arm)
@@ -355,9 +355,9 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                             pass
 
                 # Incrementally move the simulated raven to the new planned position
-                ravens[raven].move()
+                raven.move()
                 # rumble the controller when raven is limited
-                rumble_if_limited(ravens[raven], xbc)
+                rumble_if_limited(raven, xbc)
 
         while CONTROL[3] and not CONTROL[2]:
             '''
