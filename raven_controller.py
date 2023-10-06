@@ -13,8 +13,8 @@ import ambf_xbox_controller_fake as axf
 import ambf_raven_recorder as arr
 import ambf_raven_reader as arc
 
-AMBF_RAVEN = True
-PHYSICAL_RAVEN = False
+AMBF_RAVEN = int(sys.argv[2])
+PHYSICAL_RAVEN = int(sys.argv[1])
 
 if AMBF_RAVEN:
     import ambf_raven as arav
