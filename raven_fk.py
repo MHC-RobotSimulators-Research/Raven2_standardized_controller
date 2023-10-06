@@ -1,13 +1,13 @@
-from physical_raven_def import *
+# from physical_raven_def import *
 import math as m
 import numpy as np
 
-def joint_to_dhvalue(joint, arm):
+def joint_to_dhvalue(joint, arm, raven_def):
     success = False
     dhvalue = np.zeros(7, dtype = 'float')
-    if arm < 0 or arm >= RAVEN_ARMS or joint.size != RAVEN_JOINTS:
+    if arm < 0 or arm >= raven_def.RAVEN_ARMS or joint.size != raven_def.RAVEN_JOINTS:
         return success
-    for i in range(RAVEN_JOINTS):
+    for i in range(raven_def.RAVEN_JOINTS):
         if i != 2:
             if i == 5:
                 if arm == 0:
@@ -56,7 +56,7 @@ def fwd_trans(a, b, dh_alpha, dh_theta, dh_a, dh_d):
 
     return xf
 
-def fwd_kinematics(arm, input_joint_pos):
+def fwd_kinematics(arm, input_joint_pos, raven_def):
     success = False
 
     dh_alpha = np.zeros(7, dtype = 'float')
@@ -64,29 +64,30 @@ def fwd_kinematics(arm, input_joint_pos):
     dh_a = np.zeros(7, dtype = 'float')
     dh_d = np.zeros(7, dtype = 'float')
 
-    j2d = joint_to_dhvalue(input_joint_pos, arm)
+    j2d = joint_to_dhvalue(input_joint_pos, arm, raven_def)
     worked = j2d[0]
     jp_dh = j2d[1]
 
     if worked == False:
         ROS_ERROR("Something went wrong with joint to dh conversion")
         return success
-    for i in range(RAVEN_JOINTS):
+    for i in range(raven_def.RAVEN_JOINTS):
         if i == 2:
             dh_d[i] = jp_dh[i]
-            dh_theta[i] = RAVEN_DH_THETA[arm][i]
+            dh_theta[i] = raven_def.RAVEN_DH_THETA[arm][i]
         else:
-            dh_d[i] = RAVEN_DH_D[arm][i]
+            dh_d[i] = raven_def.RAVEN_DH_D[arm][i]
             dh_theta[i] = jp_dh[i]
-        dh_alpha[i] = RAVEN_DH_ALPHA[arm][i]
-        dh_a[i] = RAVEN_DH_A[arm][i]
+        dh_alpha[i] = raven_def.RAVEN_DH_ALPHA[arm][i]
+        dh_a[i] = raven_def.RAVEN_DH_A[arm][i]
 
-    output_transformation = np.matmul(np.matmul(RAVEN_T_CB, RAVEN_T_B0[arm]), fwd_trans(0, 6, dh_alpha, dh_theta, dh_a, dh_d))
+    output_transformation = np.matmul(np.matmul(raven_def.RAVEN_T_CB, raven_def.RAVEN_T_B0[arm]), fwd_trans(0, 6, dh_alpha, dh_theta, dh_a, dh_d))
 
 
     return output_transformation
 
-def fwd_kinematics_p5(arm, input_joint_pos):
+
+def fwd_kinematics_p5(arm, input_joint_pos, raven_def):
     """
     Gets the position of joint 5 origin
     """
@@ -97,23 +98,23 @@ def fwd_kinematics_p5(arm, input_joint_pos):
     dh_a = np.zeros(7, dtype = 'float')
     dh_d = np.zeros(7, dtype = 'float')
 
-    j2d = joint_to_dhvalue(input_joint_pos, arm)
+    j2d = joint_to_dhvalue(input_joint_pos, arm, raven_def)
     worked = j2d[0]
     jp_dh = j2d[1]
 
-    if worked == False:
+    if not worked:
         ROS_ERROR("Something went wrong with joint to dh conversion")
         return success
-    for i in range(RAVEN_JOINTS):
+    for i in range(raven_def.RAVEN_JOINTS):
         if i == 2:
             dh_d[i] = jp_dh[i]
-            dh_theta[i] = RAVEN_DH_THETA[arm][i]
+            dh_theta[i] = raven_def.RAVEN_DH_THETA[arm][i]
         else:
-            dh_d[i] = RAVEN_DH_D[arm][i]
+            dh_d[i] = raven_def.RAVEN_DH_D[arm][i]
             dh_theta[i] = jp_dh[i]
-        dh_alpha[i] = RAVEN_DH_ALPHA[arm][i]
-        dh_a[i] = RAVEN_DH_A[arm][i]
+        dh_alpha[i] = raven_def.RAVEN_DH_ALPHA[arm][i]
+        dh_a[i] = raven_def.RAVEN_DH_A[arm][i]
 
-    output_transformation = np.matmul(np.matmul(RAVEN_T_CB, RAVEN_T_B0[arm]), fwd_trans(0, 5, dh_alpha, dh_theta, dh_a, dh_d))
+    output_transformation = np.matmul(np.matmul(raven_def.RAVEN_T_CB, raven_def.RAVEN_T_B0[arm]), fwd_trans(0, 5, dh_alpha, dh_theta, dh_a, dh_d))
 
     return output_transformation

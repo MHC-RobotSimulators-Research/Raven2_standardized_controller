@@ -37,7 +37,7 @@ import std_msgs.msg
 import geometry_msgs.msg
 import sensor_msgs.msg
 
-import crtk_msgs.msg # crtk_msgs/operating_state
+import crtk_msgs.msg  # crtk_msgs/operating_state
 import utils_r2_py_controller as utils
 
 Deg2Rad = np.pi / 180.0
@@ -48,7 +48,7 @@ import raven_ik as ik
 import ambf_raven_def as ard
 
 
-class physical_raven2_arm():
+class physical_raven_arm():
 
     # ros node is not initialized here, it should be initialized and named by the program that use this controller
     def __init__(self, name_space, robot_name, grasper_name):
@@ -432,6 +432,7 @@ class physical_raven2_arm():
     # convert array size 7 to 16 
     def seven2sixteen (self, arr7):
         return np.concatenate([np.zeros(1), arr7, np.zeros(8)])
+
     # helper method to convert numpy array size 15 to np array size 7
     def fifthteen2seven (self, arr15):
         

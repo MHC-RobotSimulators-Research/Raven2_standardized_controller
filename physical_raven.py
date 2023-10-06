@@ -6,7 +6,7 @@ import utilities as u
 import numpy as np
 import rospy
 import physical_raven_def as prd
-from physical_raven_arm import raven2_arm
+from physical_raven_arm import physical_raven_arm
 import timeit
 
 
@@ -21,8 +21,8 @@ class physical_raven:
 
         rospy.init_node('raven_keyboard_controller', anonymous=True)
 
-        self.arm_ctl_l = raven2_arm(name_space = ' ', robot_name = 'arm1', grasper_name = 'grasp1')
-        self.arm_ctl_r = raven2_arm(name_space = ' ', robot_name = 'arm2', grasper_name = 'grasp2')
+        self.arm_ctl_l = physical_raven_arm(name_space = ' ', robot_name = 'arm1', grasper_name = 'grasp1')
+        self.arm_ctl_r = physical_raven_arm(name_space = ' ', robot_name = 'arm2', grasper_name = 'grasp2')
         self.arms = [self.arm_ctl_l, self.arm_ctl_r]
         self.raven_type = True
 
@@ -67,7 +67,7 @@ class physical_raven:
         for i in range(len(self.arms)):
             self.start_jp[i] = self.arms[i].get_measured_jpos()
             self.next_jp[i] = self.start_jp[i]
-            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i])
+            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
 
     def home_fast(self):
 
@@ -270,9 +270,7 @@ class physical_raven:
         moves the desired robot arm based on inputted changes to cartesian coordinates
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
-            x (float) : the desired change to the x coordinate
-            y (float) : the desired change to the y coordinate
-            z (float) : the desired change to the z coordinate
+            tm (numpy.array) : desired transformation matrix changes
             gangle (float) : the gripper angle, 0 is closed
             p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
             home_dh (array) : array containing home position, or desired postion of the
@@ -281,18 +279,18 @@ class physical_raven:
         # curr_jp = np.array(self.arms[arm].get_all_joint_pos(), dtype="float")
         self.start_jp[arm] = self.next_jp[arm]
         if p5:
-            curr_tm = fk.fwd_kinematics_p5(arm, self.start_jp[arm])
+            curr_tm = fk.fwd_kinematics_p5(arm, self.start_jp[arm], prd)
         else:
-            curr_tm = fk.fwd_kinematics(arm, self.start_jp[arm])
+            curr_tm = fk.fwd_kinematics(arm, self.start_jp[arm], prd)
         # print("initial tm :", curr_tm)
         # curr_tm[0, 3] += x
         # curr_tm[1, 3] += y
         # curr_tm[2, 3] += z
         curr_tm += tm
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, curr_tm, gangle, home_dh)
+            jpl = ik.inv_kinematics_p5(arm, curr_tm, gangle, home_dh, prd)
         else:
-            jpl = ik.inv_kinematics(arm, curr_tm, gangle)
+            jpl = ik.inv_kinematics(arm, curr_tm, gangle, prd)
         self.limited[arm] = jpl[1]
         # print("new jp: ", jpl)
         if self.limited[arm]:
@@ -316,9 +314,9 @@ class physical_raven:
         self.curr_tm[arm] += tm
         print("curr_tm: ", self.curr_tm[arm])
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh)
+            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, prd)
         else:
-            jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle)
+            jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle, prd)
         self.limited[arm] = jpl[1]
         if self.limited[arm]:
             print("Desired cartesian position is out of bounds for Raven2. Will move to max pos.")
@@ -326,7 +324,6 @@ class physical_raven:
         self.next_jp[arm] = new_jp
         print("next_jp: ", self.next_jp)
         print("start_jp: ", self.start_jp)
-
 
     def calc_increment(self, arm):
         """
