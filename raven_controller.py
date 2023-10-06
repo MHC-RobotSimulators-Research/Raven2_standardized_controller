@@ -273,11 +273,11 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                 break
 
             # Record controller inputs and jpos
-            for raven in ravens:
+            for raven in range(len(ravens)):
 
                 if RECORD:
                     if RECORDING:
-                        recorder.write_raven_status(raven)
+                        recorder.write_raven_status(ravens[raven])
                         recorder.write_controller_inputs(controller)
 
                     else:
@@ -319,7 +319,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             if controller[2][3]:
                 curr_dh[1] = ard.HOME_DH[1]
 
-            for raven in ravens:
+            for raven in range(len(ravens)):
                 # Control both raven arms
                 if arm_control[0] and arm_control[1]:
                     # modify position using controller inputs
@@ -357,7 +357,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                 # Incrementally move the simulated raven to the new planned position
                 ravens[raven].move()
                 # rumble the controller when raven is limited
-                rumble_if_limited(raven, xbc)
+                rumble_if_limited(ravens[raven], xbc)
 
         while CONTROL[3] and not CONTROL[2]:
             '''
