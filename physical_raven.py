@@ -67,8 +67,20 @@ class physical_raven:
         self.arm_ctl_r.pub_state_command('pause')
 
     def set_curr_tm(self):
+        success = False
+        while not success:
+            time.sleep(1)
+            for i in range(len(self.arms)):
+                self.start_jp[i] = self.arms[i].get_measured_jpos()
+
+            success = True
+
+            for i in range(len(self.arms)):
+                if any(self.start_jp[i]) == float("nan"):
+                    success = False
+                    print("Unable to get Raven positions, trying again...")
+
         for i in range(len(self.arms)):
-            self.start_jp[i] = self.arms[i].get_measured_jpos()
             self.next_jp[i] = self.start_jp[i]
             self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
 
