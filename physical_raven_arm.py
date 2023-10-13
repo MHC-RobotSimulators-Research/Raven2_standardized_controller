@@ -77,7 +77,7 @@ class physical_raven_arm():
         self.operate_state = None # [String] current robot operation state, according the CRTK standard - "DISABLED", "ENABLED", "PAUSED", "FAULT", robot can only be controlled when "ENABLED"
         self.is_homed = None 
         self.is_busy = None
-
+        self.raven_state = None
         #self.command_type = 'relative' # can be 'relative' or 'absolute', if 'relative' the command will be sent through 'jr' in CRTK, if 'absolute', the command will be sent through 'jp'
 
         self.measured_cpos_tranform = np.zeros((4,4)) # np.array 4x4 transform matrix of the end-effector measured position
@@ -124,8 +124,10 @@ class physical_raven_arm():
         elif self.robot_name == "arm2":
             topic = "/arm1/measured_js" # [IMPT] This line is because the RAVEN I use has a mismatch that the arm1's jpos is published on arm2
 
-        #topic = "/arm2/measured_js" # [IMPT] This line is because the RAVEN I use has a mismatch that the arm1's jpos is published on arm2
         self.__subscriber_measured_js = rospy.Subscriber(topic, sensor_msgs.msg.JointState, self.__callback_measured_jp)
+
+        topic = "/" + "ravenstate"
+        self.__subscriber_raven_state = rospy.Subscriber(topic, crtk_msgs.msg, self.__callback_raven_state)
 
         # robot movement publishers
         topic = "/" + self.robot_name + "/servo_cr"
@@ -196,6 +198,9 @@ class physical_raven_arm():
         idx = np.array(np.where(diff<0))
 
         return idx[0]
+
+    def __callback_raven_state(self, msg):
+        self.raven_state = msg
     def __callback_measured_cp(self, msg):
         # rot = sp_rot.from_quat([msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w])
 
