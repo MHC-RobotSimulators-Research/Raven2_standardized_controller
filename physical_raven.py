@@ -327,6 +327,7 @@ class physical_raven:
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
         self.start_jp[arm] = self.next_jp[arm]
+        tm[1][3] *= -1
         self.curr_tm[arm] += tm
         # print("curr_tm: ", self.curr_tm[arm])
         if p5:
@@ -348,14 +349,9 @@ class physical_raven:
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
         """
-        # Calculate delta jp
-        # for i in range(self.raven_joints):
-        #     self.start_jp[arm][i] = self.arms[arm].get_joint_pos(i)
-        #     self.delta_jp[arm][i] = self.next_jp[arm][i] - self.arms[arm].get_joint_pos(i)
 
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
         # print("arm", arm, " delta_jp: ", self.delta_jp[arm])
-
 
         # Find safe increment
         increment = self.delta_jp[arm] / prd.MAX_JR
