@@ -53,7 +53,7 @@ class physical_raven:
         self.set_curr_tm()
         print(self.curr_tm)
         print(self.start_jp)
-        self.resume()
+        # self.resume()
 
     def get_raven_type(self):
         return self.raven_type
@@ -76,9 +76,10 @@ class physical_raven:
             success = True
 
             for i in range(len(self.arms)):
-                if any(self.start_jp[i]) == float("nan"):
-                    success = False
-                    print("Unable to get Raven positions, trying again...")
+                for j in range(len(self.start_jp[i])):
+                    if math.isnan(self.start_jp[i, j]):
+                        success = False
+                        print("Unable to get Raven position, trying again...")
 
         for i in range(len(self.arms)):
             self.next_jp[i] = self.start_jp[i]
@@ -327,7 +328,7 @@ class physical_raven:
         """
         self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] += tm
-        print("curr_tm: ", self.curr_tm[arm])
+        # print("curr_tm: ", self.curr_tm[arm])
         if p5:
             jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, prd)
         else:
@@ -337,8 +338,8 @@ class physical_raven:
             print("Desired cartesian position is out of bounds for Raven2. Will move to max pos.")
         new_jp = jpl[0]
         self.next_jp[arm] = new_jp
-        print("next_jp: ", self.next_jp)
-        print("start_jp: ", self.start_jp)
+        # print("next_jp: ", self.next_jp)
+        # print("start_jp: ", self.start_jp)
 
     def calc_increment(self, arm):
         """
@@ -353,7 +354,7 @@ class physical_raven:
         #     self.delta_jp[arm][i] = self.next_jp[arm][i] - self.arms[arm].get_joint_pos(i)
 
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
-        print("arm", arm, " delta_jp: ", self.delta_jp[arm])
+        # print("arm", arm, " delta_jp: ", self.delta_jp[arm])
 
 
         # Find safe increment
@@ -370,7 +371,7 @@ class physical_raven:
             increments = self.man_steps
         else:
             increments = safe_increment
-        print("inc:", increments)
+        # print("inc:", increments)
 
         scale = 1 / increments
         for i in range(len(self.arms)):
