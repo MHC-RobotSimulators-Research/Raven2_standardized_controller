@@ -39,7 +39,7 @@ import sensor_msgs.msg
 
 import crtk_msgs.msg  # crtk_msgs/operating_state
 import utils_r2_py_controller as utils
-
+import raven_2.msg
 Deg2Rad = np.pi / 180.0
 Rad2Deg = 180.0 / np.pi
 
@@ -77,7 +77,7 @@ class physical_raven_arm():
         self.operate_state = None # [String] current robot operation state, according the CRTK standard - "DISABLED", "ENABLED", "PAUSED", "FAULT", robot can only be controlled when "ENABLED"
         self.is_homed = None 
         self.is_busy = None
-
+        self.raven_state = None
         #self.command_type = 'relative' # can be 'relative' or 'absolute', if 'relative' the command will be sent through 'jr' in CRTK, if 'absolute', the command will be sent through 'jp'
 
         self.measured_cpos_tranform = np.zeros((4,4)) # np.array 4x4 transform matrix of the end-effector measured position
@@ -124,8 +124,10 @@ class physical_raven_arm():
         elif self.robot_name == "arm2":
             topic = "/arm1/measured_js" # [IMPT] This line is because the RAVEN I use has a mismatch that the arm1's jpos is published on arm2
 
-        #topic = "/arm2/measured_js" # [IMPT] This line is because the RAVEN I use has a mismatch that the arm1's jpos is published on arm2
         self.__subscriber_measured_js = rospy.Subscriber(topic, sensor_msgs.msg.JointState, self.__callback_measured_jp)
+
+        topic = "/" + "ravenstate"
+        self.__subscriber_raven_state = rospy.Subscriber(topic, raven_2.msg.raven_state, self.__callback_raven_state)
 
         # robot movement publishers
         topic = "/" + self.robot_name + "/servo_cr"
@@ -196,6 +198,12 @@ class physical_raven_arm():
         idx = np.array(np.where(diff<0))
 
         return idx[0]
+
+    def __callback_raven_state(self, msg):
+        self.raven_state = msg
+
+    def get_raven_state(self):
+        return self.raven_state
     def __callback_measured_cp(self, msg):
         # rot = sp_rot.from_quat([msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w])
 
@@ -359,71 +367,6 @@ class physical_raven_arm():
         #print('Command pub count: ' + str(self.pub_count_motion) + ' | msg: ' + str(joint_command)) # [debug]
 
         return 0    
-    
-        # return a np array sized 7
-    def countDistance(self):
-        #print('new_jp: ', self.new_jp)
-        #print('measured_jpos: ', self.measured_jpos)
-        return self.new_jp - self.measured_jpos
-        #return self.new_jp - self.get_temp_measured_jpos()
-
-    def calc_increment(self):
-        """
-        Calculates the difference between the current joint positions and planned joint positions
-        then calculates the number of increments required to stay within joint rotation limits
-        Args:
-            arm (int) : 0 for the left arm and 1 for the right arm
-        """
-        # Calculate delta jp
-        max_inc_jr = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad]) / 500 #, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad]) # This is the max velocity of jr command, should be rad/sec and m/sec for rotation and translation joints 
-        # Find safe increment
-        # increment = self.countDistance() / self.max_jr
-        increment = self.countDistance() / max_inc_jr
-
-        #print("increments: ", increment)
-        return max(map(abs, increment)) + 1
-
-    def manual_move(self, arm, x, y, z, gangle, p5=False, home_dh=ard.HOME_DH):
-        """
-        moves the desired robot arm based on inputted changes to cartesian coordinates
-        Args:
-            arm (int) : 0 for the left arm and 1 for the right arm
-            x (float) : the desired change to the x coordinate
-            y (float) : the desired change to the y coordinate
-            z (float) : the desired change to the z coordinate
-            gangle (float) : the gripper angle, 0 is closed
-            p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
-            home_dh (array) : array containing home position, or desired postion of the
-                joints not set by cartesian coordinates in inv_kinematics_p5
-        """
-        #curr_jp = self.measured_jpos
-        #print("size curr_jp: ", len(self.measured_jpos))
-        curr_jp = self.measured_jpos
-        #curr_jp = np.zeros(7,dtype="float")
-        #print("current joint positions: " + str(curr_jp))
-        if p5:
-            curr_tm = fk.fwd_kinematics_p5(arm, curr_jp)
-            #print(curr_tm) 
-            print(curr_tm)
-        else:
-            curr_tm = fk.fwd_kinematics(arm, curr_jp)
-        curr_tm[0, 3] += x
-        print("x: ",x)
-        curr_tm[1, 3] += y
-        print("y: ", y)
-        curr_tm[2, 3] += z
-        print("z: ", z)
-        print(curr_tm)
-        if p5:
-            jpl = ik.inv_kinematics_p5(arm, curr_tm, gangle, home_dh)
-        else:
-            jpl = ik.inv_kinematics(arm, curr_tm, gangle)
-        self.limited[arm] = jpl[1]
-        if self.limited[arm]:
-            print("Desired cartesian position is out of bounds for Raven2. Will move to max pos.")
-        self.new_jp = jpl[0]
-        print(f"{self.robot_name} new jp: {self.new_jp}")
-        return
     
     # helper method to convert numpy array size 7 to np array size 15
     def seven2fifthteen (self, arr7):
