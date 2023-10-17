@@ -356,6 +356,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
 
                 # Incrementally move the simulated raven to the new planned position
                 raven.move()
+                print(raven.get_raven_status())
                 # rumble the controller when raven is limited
                 rumble_if_limited(raven, xbc)
 

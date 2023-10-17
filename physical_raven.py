@@ -130,86 +130,96 @@ class physical_raven:
         print("not implemented :(")
 
     def get_raven_status(self):
-        # status = [(time.time())]
-        #
-        # # Add jpos for both arms
-        # for i in range(len(self.arms)):
-        #     jpos = self.arms[i].get_all_joint_pos()
-        #     jpos.insert(3, 0)
-        #     status.extend(jpos)
-        #     # status.extend(self.arms[i].get_all_joint_pos().insert(3, 0))  # 7 numbers
-        #
-        # # Placeholders for runlevel, sublevel, and last_seq
-        # for i in range(3):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for type
-        # for i in range(2):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for pos
-        # for i in range(6):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for ori
-        # for i in range(18):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for ori_d
-        # for i in range(18):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for pos_d
-        # for i in range(6):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for encVals
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for dac_val
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for Tau
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for mpos
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for mvel
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Add jvel for both arms
-        # for i in range(len(self.arms)):
-        #     jvel = self.arms[i].get_all_joint_vel()
-        #     jvel.insert(3, 0)
-        #     status.extend(jvel)  # 7 numbers
-        #
-        # # Placeholders for jpos_d
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for grasp_d
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for encoffsets
-        # for i in range(16):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for jac_vel
-        # for i in range(12):
-        #     status.append(float("nan"))
-        #
-        # # Placeholders for jac_f
-        # for i in range(12):
-        #     status.append(float("nan"))
-        # return status
-        print("not implemented :(")
+        msg = self.arms[0].get_raven_state()
+
+        status = np.zeros((1, 240))
+        timestr = "%.6f" % msg.hdr.stamp.to_sec()
+        status[0] = timestr
+        idx_count = 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.jpos[index])
+            idx_count += 1
+
+        status[0, idx_count] = ("%.6f" % msg.runlevel)
+        idx_count += 1
+        status[0, idx_count] = ("%.6f" % msg.sublevel)
+        idx_count += 1
+        status[0, idx_count] = ("%.6f" % msg.last_seq)
+        idx_count += 1
+
+        for index in range(0, 2):
+            status[0, idx_count] = ("%.6f" % msg.type[index])
+            idx_count += 1
+
+        for index in range(0, 6):
+            status[0, idx_count] = ("%.6f" % msg.pos[index])
+            idx_count += 1
+
+        for index in range(0, 18):
+            status[0, idx_count] = ("%.6f" % msg.ori[index])
+            idx_count += 1
+
+        for index in range(0, 18):
+            status[0, idx_count] = ("%.6f" % msg.ori_d[index])
+            idx_count += 1
+
+        for index in range(0, 6):
+            status[0, idx_count] = ("%.6f" % msg.pos_d[index])
+            idx_count += 1
+
+        # newline[0, idx_count] = (msg.dt)
+        # idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.encVals[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.dac_val[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.tau[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.mpos[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.mvel[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.jvel[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.mpos_d[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.jpos_d[index])
+            idx_count += 1
+
+        for index in range(0, 2):
+            status[0, idx_count] = ("%.6f" % msg.grasp_d[index])
+            idx_count += 1
+
+        for index in range(0, 16):
+            status[0, idx_count] = ("%.6f" % msg.encoffsets[index])
+            idx_count += 1
+
+        for index in range(0, 12):
+            status[0, idx_count] = ("%.6f" % msg.jac_vel[index])
+            idx_count += 1
+
+        for index in range(0, 12):
+            status[0, idx_count] = ("%.6f" % msg.jac_f[index])
+            idx_count += 1
+
+        return status.tolist()[0]
 
     def set_raven_pos(self, pos_list):
         """
@@ -327,7 +337,7 @@ class physical_raven:
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
         self.start_jp[arm] = self.next_jp[arm]
-        tm[1][3] *= -1
+        tm[1, 3] *= -1
         self.curr_tm[arm] += tm
         # print("curr_tm: ", self.curr_tm[arm])
         if p5:
