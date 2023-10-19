@@ -24,7 +24,7 @@ class physical_raven:
         self.arm_ctl_l = physical_raven_arm(name_space = ' ', robot_name = 'arm1', grasper_name = 'grasp1')
         self.arm_ctl_r = physical_raven_arm(name_space = ' ', robot_name = 'arm2', grasper_name = 'grasp2')
         self.arms = [self.arm_ctl_l, self.arm_ctl_r]
-        self.raven_type = True
+        self.raven_type = prd.RAVEN_TYPE
 
         self.start_jp = np.zeros((2, 7))  # indexed at 0
         self.delta_jp = np.zeros((2, 7))
@@ -81,9 +81,9 @@ class physical_raven:
                         success = False
                         print("Unable to get Raven position, trying again...")
 
-        for i in range(len(self.arms)):
-            self.next_jp[i] = self.start_jp[i]
-            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
+        # for i in range(len(self.arms)):
+        #     self.next_jp[i] = self.start_jp[i]
+        #     self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
 
     def home_fast(self):
 

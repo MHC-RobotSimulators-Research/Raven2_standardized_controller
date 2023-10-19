@@ -28,7 +28,7 @@ class ambf_raven:
             link_names = self.arms[i].get_children_names()
             for j in range(self.arms[i].get_num_of_children()):
                 self.links.append(self._client.get_obj_handle('raven_2/' + link_names[j]))
-        self.raven_type = False
+        self.raven_type = ard.RAVEN_TYPE
 
         self.start_jp = np.zeros((2, 7))  # indexed at 0
         self.delta_jp = np.zeros((2, 7))
