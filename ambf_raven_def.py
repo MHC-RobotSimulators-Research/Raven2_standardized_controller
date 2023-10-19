@@ -6,6 +6,7 @@ import sys
 # Copied from https://github.com/WPI-AIM/ambf/blob/restructure/ambf_controller/raven2/src/ambf_defines.cpp
 
 # Defines variables used in raven_fk, raven_ik, etc.
+RAVEN_TYPE = False
 
 Deg2Rad = np.pi / 180.0
 Rad2Deg = 180.0 / np.pi
