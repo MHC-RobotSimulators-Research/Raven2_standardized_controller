@@ -24,8 +24,7 @@ raven_py_controller.py
 
 Python controller for RAVEN II using CRTK API
 
-date Jan 10, 2022
-author Haonan Peng, Yun-Hsuan Su, Andrew Lewis, 
+author Haonan Peng, Yun-Hsuan Su, Andrew Lewis, Mai Bui
 """
 
 import time
@@ -173,6 +172,13 @@ class physical_raven_arm():
     def get_measured_jpos(self):
         return self.measured_jpos
     
+    def get_xyz(self):
+        xyz = np.zeros(3)
+        xyz[0] = self.measured_cpos_tranform[0,3]
+        xyz[1] = self.measured_cpos_tranform[1,3]
+        xyz[1] = self.measured_cpos_tranform[2,3]
+        return xyz
+        
     def __check_max_jpose_command(self, joint_command):
         max_jr = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad]) / 500 # This is the max velocity of jr command, should be rad/sec and m/sec for rotation and translation joints 
 

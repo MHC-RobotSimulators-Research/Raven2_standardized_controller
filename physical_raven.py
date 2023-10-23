@@ -85,8 +85,8 @@ class physical_raven:
             self.next_jp[i] = self.start_jp[i]
             self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
             # add angles to change origin axes
-            self.curr_tm[i][0, 0] += math.cos(math.radians(60))
-            self.curr_tm[i][2, 2] += math.cos(math.radians(30))
+            # self.curr_tm[i][0, 0] += math.cos(math.radians(60))
+            # self.curr_tm[i][2, 2] += math.cos(math.radians(30))
 
     def home_fast(self):
 
