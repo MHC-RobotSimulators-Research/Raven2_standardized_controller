@@ -53,8 +53,8 @@ RAVEN_T_B0         = np.array([np.matrix([[0, 0,  1,  0.30071], [0, -1, 0, 0.061
                                np.matrix([[0, 0, -1, -0.30071], [0,  1, 0, 0.061], [1, 0, 0, -0.007], [0, 0, 0, 1]], dtype = 'float')])
 RAVEN_T_CB         = np.matrix([[0.0, 1.0, 0.0, 0.0],[-1.0, 0.0, 0.0, 0.0],[0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]) #using quaternion to rotational translator
 
-Z_ROT = np.array([np.matrix([[m.cos(np.deg2rad(25)), -m.sin(np.deg2rad(25)), 0, 0], [m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float'),
-                  np.matrix([[m.cos(np.deg2rad(-25)), -m.sin(np.deg2rad(-25)), 0, 0], [m.sin(np.deg2rad(-25)), m.cos(np.deg2rad(-25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')])
+Z_ROT = np.array([np.matrix([[m.cos(np.deg2rad(30)), 0, m.cos(np.deg2rad(20)), 0], [m.sin(np.deg2rad(-30)), 1, 0, 0], [0, 0, m.cos(np.deg2rad(-70)), 0], [0, 0, 0, 1]], dtype='float'),
+                  np.matrix([[m.cos(np.deg2rad(-30)), 0, m.cos(np.deg2rad(20)), 0], [m.sin(np.deg2rad(30)), 1, 0, 0], [0, 0, m.cos(np.deg2rad(-70)), 0], [0, 0, 0, 1]], dtype='float')])
 # Raven joints:
 # joint -: 0_link-base_link_L:             fixed
 # joint 0: base_link_L-link1_L:            revolute        (shoulder)              range: -pi~pi
