@@ -83,7 +83,7 @@ class physical_raven:
 
         for i in range(len(self.arms)):
             self.next_jp[i] = self.start_jp[i]
-            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
+            self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
 
     def home_fast(self):
 
