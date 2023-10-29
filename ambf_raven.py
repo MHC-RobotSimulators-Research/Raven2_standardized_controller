@@ -164,12 +164,16 @@ class ambf_raven:
             jvel.insert(3, 0)
             status.extend(jvel)  # 7 numbers
 
+        # Placeholders for pos_d
+        for i in range(16):
+            status.append(float("nan"))
+
         # Placeholders for jpos_d
         for i in range(16):
             status.append(float("nan"))
 
         # Placeholders for grasp_d
-        for i in range(16):
+        for i in range(2):
             status.append(float("nan"))
 
         # Placeholders for encoffsets

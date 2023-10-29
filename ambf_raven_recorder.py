@@ -1,3 +1,5 @@
+import time
+from datetime import datetime
 import pandas as pd
 
 
@@ -8,6 +10,7 @@ class ambf_raven_recorder:
         self.ci_df = None
         self.writer = None
         self.file = None
+        self.start_time = None
 
     def build_rs_headers(self):
         """
@@ -67,12 +70,16 @@ class ambf_raven_recorder:
         for i in range(16):
             headers.append("jvel" + str(i))
 
+        # Headers for mpos_d
+        for i in range(16):
+            headers.append("mpos_d" + str(i))
+
         # Headers for jpos_d
         for i in range(16):
             headers.append("jpos_d" + str(i))
 
         # Headers for grasp_d
-        for i in range(16):
+        for i in range(2):
             headers.append("grasp_d" + str(i))
 
         # Headers for encoffsets
@@ -94,6 +101,7 @@ class ambf_raven_recorder:
         Initializes the dataframe in a format matching the raven status rosbag recorder
         """
         self.rs_df = pd.DataFrame(columns=self.build_rs_headers())
+        # self.start_time = time.time()
         print("Now recording raven status")
 
     def write_raven_status(self, raven):
@@ -101,6 +109,11 @@ class ambf_raven_recorder:
         Writes the current raven status to the dataframe
         """
         newline = raven.get_raven_status()
+
+        if self.start_time is None:
+            self.start_time = newline[0]
+
+        newline[0] -= self.start_time
         self.rs_df.loc[len(self.rs_df.index)] = newline
 
     def build_ci_headers(self):
@@ -138,11 +151,12 @@ class ambf_raven_recorder:
         Args:
             filename : the path to/filename of the csv to be saved
         """
-        filename_rs = filename + "_rs.csv"
-        filename_ci = filename + "_ci.csv"
+
+        filename_rs = filename + "_" + str(datetime.now()) + "_rs.csv"
+        filename_ci = filename + "_" + str(datetime.now()) + "_ci.csv"
 
         if self.rs_df is not None:
-            self.rs_df.to_csv(filename_rs, encoding='utf-8', index=False)
+            self.rs_df.to_csv(filename_rs, encoding='utf-8', index=True)
             self.rs_df = None
         if self.ci_df is not None:
             self.ci_df.to_csv(filename_ci, encoding='utf-8', index=False)
