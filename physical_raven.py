@@ -337,7 +337,9 @@ class physical_raven:
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
         self.start_jp[arm] = self.next_jp[arm]
+
         tm[1, 3] *= -1
+
         self.curr_tm[arm] += tm
         # print("curr_tm: ", self.curr_tm[arm])
         if p5:
