@@ -306,7 +306,8 @@ class ambf_raven:
             gangle = -gangle
 
         self.start_jp[arm] = self.next_jp[arm]
-        self.curr_tm[arm] += tm
+        # self.curr_tm[arm] += tm
+        self.curr_tm[arm] = np.matmul(self.curr_tm[arm], tm)
         # print(self.curr_tm[arm])
         if p5:
             jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, ard)
