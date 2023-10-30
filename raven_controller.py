@@ -274,21 +274,20 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
 
             # Record controller inputs and jpos
             for raven in ravens:
-                if not raven.get_raven_type():
-                    if RECORD:
-                        if RECORDING:
-                            recorder.write_raven_status(raven)
-                            recorder.write_controller_inputs(controller)
+                if RECORD:
+                    if RECORDING:
+                        recorder.write_raven_status(raven)
+                        recorder.write_controller_inputs(controller)
 
-                        else:
-                            recorder.record_raven_status()
-                            recorder.record_controller_inputs()
-                            recorder.write_raven_status(raven)
-                            recorder.write_controller_inputs(controller)
-                            RECORDING = True
-                    elif RECORDING:
-                        recorder.stop_recording(FILE_OUT)
-                        RECORDING = False
+                    else:
+                        recorder.record_raven_status()
+                        recorder.record_controller_inputs()
+                        recorder.write_raven_status(raven)
+                        recorder.write_controller_inputs(controller)
+                        RECORDING = True
+                elif RECORDING:
+                    recorder.stop_recording(FILE_OUT)
+                    RECORDING = False
 
             # Set which control mode to use
             if controller[2][4] and controller[2][5]:
@@ -356,6 +355,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
 
                 # Incrementally move the simulated raven to the new planned position
                 raven.move()
+                # print(len(raven.get_raven_status()))
                 # rumble the controller when raven is limited
                 rumble_if_limited(raven, xbc)
 
