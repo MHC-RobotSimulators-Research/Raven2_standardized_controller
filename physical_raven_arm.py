@@ -39,7 +39,7 @@ import sensor_msgs.msg
 
 import crtk_msgs.msg  # crtk_msgs/operating_state
 import utils_r2_py_controller as utils
-
+import raven_2.msg
 Deg2Rad = np.pi / 180.0
 Rad2Deg = 180.0 / np.pi
 
@@ -127,7 +127,7 @@ class physical_raven_arm():
         self.__subscriber_measured_js = rospy.Subscriber(topic, sensor_msgs.msg.JointState, self.__callback_measured_jp)
 
         topic = "/" + "ravenstate"
-        self.__subscriber_raven_state = rospy.Subscriber(topic, crtk_msgs.msg, self.__callback_raven_state)
+        self.__subscriber_raven_state = rospy.Subscriber(topic, raven_2.msg.raven_state, self.__callback_raven_state)
 
         # robot movement publishers
         topic = "/" + self.robot_name + "/servo_cr"
@@ -201,6 +201,10 @@ class physical_raven_arm():
 
     def __callback_raven_state(self, msg):
         self.raven_state = msg
+
+    def get_raven_state(self):
+        return self.raven_state
+
     def __callback_measured_cp(self, msg):
         # rot = sp_rot.from_quat([msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w])
 
