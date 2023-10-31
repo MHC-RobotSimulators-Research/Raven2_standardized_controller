@@ -204,6 +204,7 @@ class physical_raven_arm():
 
     def get_raven_state(self):
         return self.raven_state
+
     def __callback_measured_cp(self, msg):
         # rot = sp_rot.from_quat([msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w])
 
