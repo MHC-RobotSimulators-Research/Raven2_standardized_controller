@@ -84,15 +84,15 @@ def update_pos_two_arm(controller):
     # Update coordinates for both arms
     for arm in range(2):
         if controller[arm][3] == 1 and DEADZONE < abs(controller[arm][1]):
-            # delta_tm[arm][2, 3] = -controller[arm][1] / DIV
-            delta_tm[arm][0, 3] = -controller[arm][1] / DIV
+            delta_tm[arm][2, 3] = -controller[arm][1] / DIV
+            # delta_tm[arm][0, 3] = -controller[arm][1] / DIV
         else:
             # note x and y are swapped to make controls more intuitive
             if DEADZONE < abs(controller[arm][0]):
-                delta_tm[arm][2, 3] = -controller[arm][0] / DIV
+                delta_tm[arm][0, 3] = -controller[arm][0] / DIV
                 # pass
             if DEADZONE < abs(controller[arm][1]):
-                delta_tm[arm][1, 3] = -controller[arm][1] / DIV
+                delta_tm[arm][1, 3] = controller[arm][1] / DIV
                 pass
         # Set gripper angles
         gangle[arm] = 1 - (controller[arm][2] / 4)

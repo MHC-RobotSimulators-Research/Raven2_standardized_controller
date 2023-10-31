@@ -83,8 +83,9 @@ class physical_raven:
 
         for i in range(len(self.arms)):
             self.next_jp[i] = self.start_jp[i]
-            self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.Z_ROT[i])
-            # self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
+            # self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.Z_ROT[i])
+            self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
+            self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.X_ROT)
 
 
     def home_fast(self):
@@ -342,10 +343,10 @@ class physical_raven:
         tm[1, 3] *= -1
         # print(tm)
         # tm = np.matmul(tm, prd.IDENTITY)
-        # tm = np.matmul(tm, prd.Z_ROT[arm])
+        # tm = np.matmul(prd.X_ROT, tm)
         # print(tm)
         # self.curr_tm[arm] += tm
-        self.curr_tm[arm] = np.matmul(self.curr_tm[arm], tm)
+        self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
         # print("curr_tm: ", self.curr_tm[arm])
         if p5:
             jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, prd)

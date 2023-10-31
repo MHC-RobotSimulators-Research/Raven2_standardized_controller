@@ -56,6 +56,11 @@ RAVEN_T_CB         = np.matrix([[1, 0, 0, 0],[0, 1, 0, 0],[0, 0, 1, 0], [0, 0, 0
 Z_ROT = np.array([np.matrix([[m.cos(np.deg2rad(25)), -m.sin(np.deg2rad(25)), 0, 0], [m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float'),
                   np.matrix([[m.cos(np.deg2rad(-25)), -m.sin(np.deg2rad(-25)), 0, 0], [m.sin(np.deg2rad(-25)), m.cos(np.deg2rad(-25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')])
 
+X_ROT = np.matrix([[1, 0, 0, 0],
+                    [0, m.cos(np.deg2rad(25)), m.sin(np.deg2rad(25)), 0],
+                    [0, -m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0],
+                    [0, 0, 0, 1]], dtype='float')
+
 IDENTITY = np.matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')
 # Raven joints:
 # joint -: 0_link-base_link_L:             fixed

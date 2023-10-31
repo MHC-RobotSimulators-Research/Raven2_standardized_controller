@@ -186,7 +186,10 @@ def inv_kinematics_p5(arm, input_cp, input_gangle, home_dh, raven_def):
     dh_a = np.zeros(6) # known, except for joint 3 (index 2)
 
     # calculate p05 from current position (p5 with respect to RCM?)
-    p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.RAVEN_T_CB, raven_def.RAVEN_T_B0[arm])), input_cp)
+    # p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.RAVEN_T_CB, raven_def.RAVEN_T_B0[arm])), input_cp)
+    # p05_dh = np.matmul(np.linalg.inv(raven_def.RAVEN_T_B0[arm]), input_cp)
+    p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.X_ROT, raven_def.RAVEN_T_B0[arm])), input_cp)
+
     p05 = np.array([p05_dh[0, 3], p05_dh[1, 3], p05_dh[2, 3], 1.0], dtype="float")
 
     for i in range(raven_def.RAVEN_JOINTS - 1):
