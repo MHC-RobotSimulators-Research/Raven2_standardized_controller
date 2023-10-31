@@ -56,9 +56,10 @@ RAVEN_T_CB         = np.matrix([[1, 0, 0, 0],[0, 1, 0, 0],[0, 0, 1, 0], [0, 0, 0
 Z_ROT = np.array([np.matrix([[m.cos(np.deg2rad(25)), -m.sin(np.deg2rad(25)), 0, 0], [m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float'),
                   np.matrix([[m.cos(np.deg2rad(-25)), -m.sin(np.deg2rad(-25)), 0, 0], [m.sin(np.deg2rad(-25)), m.cos(np.deg2rad(-25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')])
 
+x_rot_val = 30
 X_ROT = np.matrix([[1, 0, 0, 0],
-                    [0, m.cos(np.deg2rad(25)), m.sin(np.deg2rad(25)), 0],
-                    [0, -m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0],
+                    [0, m.cos(np.deg2rad(x_rot_val)), m.sin(np.deg2rad(x_rot_val)), 0],
+                    [0, -m.sin(np.deg2rad(x_rot_val)), m.cos(np.deg2rad(x_rot_val)), 0],
                     [0, 0, 0, 1]], dtype='float')
 
 IDENTITY = np.matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')

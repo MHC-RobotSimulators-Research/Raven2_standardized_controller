@@ -93,7 +93,7 @@ def update_pos_two_arm(controller):
                 # pass
             if DEADZONE < abs(controller[arm][1]):
                 delta_tm[arm][1, 3] = controller[arm][1] / DIV
-                pass
+                # pass
         # Set gripper angles
         gangle[arm] = 1 - (controller[arm][2] / 4)
 
@@ -112,14 +112,14 @@ def update_pos_one_arm(controller, arm, curr_dh):
     global DEADZONE
     global DIV
 
-    delta_tm = [np.matrix([[0, 0, 0, 0],
-                          [0, 0, 0, 0],
-                          [0, 0, 0, 0],
-                          [0, 0, 0, 0]], dtype=float),
-                np.matrix([[0, 0, 0, 0],
-                           [0, 0, 0, 0],
-                           [0, 0, 0, 0],
-                           [0, 0, 0, 0]], dtype=float)]
+    delta_tm = [np.matrix([[1, 0, 0, 0],
+                          [0, 1, 0, 0],
+                          [0, 0, 1, 0],
+                          [0, 0, 0, 1]], dtype=float),
+                np.matrix([[1, 0, 0, 0],
+                           [0, 1, 0, 0],
+                           [0, 0, 1, 0],
+                           [0, 0, 0, 1]], dtype=float)]
 
     gangle = [0, 0]
 
@@ -128,9 +128,9 @@ def update_pos_one_arm(controller, arm, curr_dh):
         delta_tm[arm][2, 3] = -controller[0][1] / DIV
     else:
         if DEADZONE < abs(controller[0][0]):
-            delta_tm[arm][1, 3] = -controller[0][0] / DIV
+            delta_tm[arm][0, 3] = -controller[0][0] / DIV
         if DEADZONE < abs(controller[0][1]):
-            delta_tm[arm][0, 3] = -controller[0][1] / DIV
+            delta_tm[arm][1, 3] = controller[0][1] / DIV
 
     # Left arm
     if not arm:
