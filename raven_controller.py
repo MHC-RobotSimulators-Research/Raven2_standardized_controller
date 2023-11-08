@@ -92,7 +92,7 @@ def update_pos_two_arm(controller):
                 delta_tm[arm][0, 3] = -controller[arm][0] / DIV
                 # pass
             if DEADZONE < abs(controller[arm][1]):
-                delta_tm[arm][1, 3] = controller[arm][1] / DIV
+                delta_tm[arm][1, 3] = -controller[arm][1] / DIV
                 # pass
         # Set gripper angles
         gangle[arm] = 1 - (controller[arm][2] / 4)
@@ -130,7 +130,7 @@ def update_pos_one_arm(controller, arm, curr_dh):
         if DEADZONE < abs(controller[0][0]):
             delta_tm[arm][0, 3] = -controller[0][0] / DIV
         if DEADZONE < abs(controller[0][1]):
-            delta_tm[arm][1, 3] = controller[0][1] / DIV
+            delta_tm[arm][1, 3] = -controller[0][1] / DIV
 
     # Left arm
     if not arm:
@@ -347,7 +347,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                     # modify position using controller inputs
                     delta_tm, gangle, curr_dh = update_pos_one_arm(controller,arm, curr_dh)
                     # Plan new position based off of desired cartesian changes
-                    raven.plan_move(arm, delta_tm[arm], gangle[arm], True, curr_dh)
+                    raven.plan_move_abs(arm, delta_tm[arm], gangle[arm], True, curr_dh)
 
                     if not raven.get_raven_type():
                         try:

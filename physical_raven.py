@@ -91,18 +91,18 @@ class physical_raven:
     def home_fast(self):
 
         self.set_curr_tm()
-
         self.next_jp = [self.home_joints, self.home_joints]
         self.move()
+        self.set_curr_tm()
 
-        for j in range(len(self.moved)):
-            self.homed[j] = self.moved[j]
+        # for j in range(len(self.moved)):
+        #     self.homed[j] = self.moved[j]
 
-        if all(self.homed):
-            print("Raven is homed!")
-
-        if not all(self.homed):
-            print("Raven could not be homed, please try again :(")
+        # if all(self.homed):
+        #     print("Raven is homed!")
+        #
+        # if not all(self.homed):
+        #     print("Raven could not be homed, please try again :(")
 
     def sine_dance(self):
         # if self.i == 0:
@@ -340,7 +340,6 @@ class physical_raven:
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
         self.start_jp[arm] = self.next_jp[arm]
-        tm[1, 3] *= -1
         # print(tm)
         # tm = np.matmul(tm, prd.IDENTITY)
         # tm = np.matmul(prd.X_ROT, tm)

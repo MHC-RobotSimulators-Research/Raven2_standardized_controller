@@ -30,7 +30,7 @@ HOME_DH            = np.array([[1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi
                                 [1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., -0., 0.52359878]],
                                 dtype="float")
 
-MAX_JR             = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad], dtype="float") / COMMAND_RATE * 2
+MAX_JR             = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad], dtype="float") / COMMAND_RATE
 # MAX_JR             = np.array([0.00500000, 0.00500000, 0.00500000, 0.00500000, 0.00500000, 0.00500000, 0.00500000], dtype="float")
 
 
@@ -56,6 +56,12 @@ RAVEN_IKIN_PARAM   = np.array([float(m.sin(RAVEN_DH_ALPHA[0][1])),
 RAVEN_T_B0         = np.array([np.matrix([[0, 0,  1,  0.30071], [0, -1, 0, 0.061], [1, 0, 0, -0.007], [0, 0, 0, 1]], dtype = 'float'),
                                np.matrix([[0, 0, -1, -0.30071], [0,  1, 0, 0.061], [1, 0, 0, -0.007], [0, 0, 0, 1]], dtype = 'float')])
 RAVEN_T_CB         = np.matrix([[0.0, 1.0, 0.0, 0.0],[-1.0, 0.0, 0.0, 0.0],[0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]) #using quaternion to rotational translator
+
+x_rot_val = 25
+X_ROT = np.matrix([[1, 0, 0, 0],
+                    [0, m.cos(np.deg2rad(x_rot_val)), m.sin(np.deg2rad(x_rot_val)), 0],
+                    [0, -m.sin(np.deg2rad(x_rot_val)), m.cos(np.deg2rad(x_rot_val)), 0],
+                    [0, 0, 0, 1]], dtype='float')
 
 # Raven joints:
 # joint -: 0_link-base_link_L:             fixed

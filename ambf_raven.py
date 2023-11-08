@@ -65,18 +65,19 @@ class ambf_raven:
             self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], ard)
 
     def home_fast(self):
-
+        self.set_curr_tm()
         self.next_jp = [self.home_joints, self.home_joints]
         self.move()
+        self.set_curr_tm()
 
-        for j in range(len(self.moved)):
-            self.homed[j] = self.moved[j]
+        # for j in range(len(self.moved)):
+        #     self.homed[j] = self.moved[j]
 
-        if all(self.homed):
-            print("Raven is homed!")
-
-        if not all(self.homed):
-            print("Raven could not be homed, please try again :(")
+        # if all(self.homed):
+        #     print("Raven is homed!")
+        #
+        # if not all(self.homed):
+        #     print("Raven could not be homed, please try again :(")
 
     def sine_dance(self):
         if self.i == 0:
@@ -110,6 +111,9 @@ class ambf_raven:
         # Add jpos for both arms
         for i in range(len(self.arms)):
             jpos = self.arms[i].get_all_joint_pos()
+            # convert jpos to degrees
+            for i in range(len(jpos)):
+                jpos[i] = jpos[i] * ard.Deg2Rad
             jpos.insert(3, 0)
             status.extend(jpos)
             # status.extend(self.arms[i].get_all_joint_pos().insert(3, 0))  # 7 numbers
@@ -305,9 +309,11 @@ class ambf_raven:
         if arm == 1:
             gangle = -gangle
 
+        tm[0, 3] *= -1
+
         self.start_jp[arm] = self.next_jp[arm]
         # self.curr_tm[arm] += tm
-        self.curr_tm[arm] = np.matmul(self.curr_tm[arm], tm)
+        self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
         # print(self.curr_tm[arm])
         if p5:
             jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, ard)
