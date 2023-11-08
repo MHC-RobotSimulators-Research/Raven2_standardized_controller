@@ -161,3 +161,4 @@ class ambf_raven_recorder:
         if self.ci_df is not None:
             self.ci_df.to_csv(filename_ci, encoding='utf-8', index=False)
             self.ci_df = None
+        self.start_time = None
