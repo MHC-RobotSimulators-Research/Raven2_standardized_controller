@@ -35,6 +35,7 @@ class ambf_raven:
         self.home_joints = ard.HOME_JOINTS
         self.next_jp = np.zeros((2, 7))
         self.curr_tm = [0, 0]
+        self.curr_dh = ard.HOME_DH
 
         self.dance_scale_joints = ard.DANCE_SCALE_JOINTS
         self.loop_rate = ard.LOOP_RATE
@@ -62,7 +63,7 @@ class ambf_raven:
     def set_curr_tm(self):
         for i in range(len(self.arms)):
             self.start_jp[i] = self.arms[i].get_all_joint_pos()
-            self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], ard)
+            self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], ard)
 
     def home_fast(self):
         self.set_curr_tm()
@@ -78,6 +79,9 @@ class ambf_raven:
         #
         # if not all(self.homed):
         #     print("Raven could not be homed, please try again :(")
+
+    def home_grasper(self, arm):
+        self.curr_dh[arm] = ard.HOME_DH[arm]
 
     def sine_dance(self):
         if self.i == 0:
@@ -295,7 +299,7 @@ class ambf_raven:
         new_jp = jpl[0]
         self.next_jp[arm] = new_jp
 
-    def plan_move_abs(self, arm, tm, gangle, p5=False, home_dh=ard.HOME_DH):
+    def plan_move_abs(self, arm, tm, gangle, p5=False, delta_dh=None,):
         """
         Plans a move using the absolute cartesian position
         Args:
@@ -303,20 +307,32 @@ class ambf_raven:
             tm (numpy.array) : desired transformation matrix changes
             gangle (float) : the gripper angle, 0 is closed
             p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
-            home_dh (array) : array containing home position, or desired postion of the
-                joints not set by cartesian coordinates in inv_kinematics_p5
+            delta_dh (array) : array containing home position, or desired postion of the
+            joints not set by cartesian coordinates in inv_kinematics_p5
         """
+        # update curr_tm
         if arm == 1:
             gangle = -gangle
-
         tm[0, 3] *= -1
-
         self.start_jp[arm] = self.next_jp[arm]
-        # self.curr_tm[arm] += tm
         self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
-        # print(self.curr_tm[arm])
+
+        # update curr_dh
+        if delta_dh is not None:
+            if not arm:
+                if abs(self.curr_dh[0][3] - delta_dh[0][3] / 10) < math.pi:
+                    self.curr_dh[0][3] += delta_dh[0][3]
+                if abs(self.curr_dh[0][4] - delta_dh[0][4] / 10) < 2:
+                    self.curr_dh[0][4] += delta_dh[0][4]
+            else:
+                if abs(self.curr_dh[1][3] + delta_dh[1][3] / 10) < math.pi:
+                    self.curr_dh[1][3] += delta_dh[1][3]
+                if abs(self.curr_dh[1][4] + delta_dh[1][4] / 10) < 2:
+                    self.curr_dh[1][4] += delta_dh[1][4]
+
+        # generate new_jp
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, ard)
+            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, self.curr_dh, ard)
         else:
             jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle, ard)
         self.limited[arm] = jpl[1]

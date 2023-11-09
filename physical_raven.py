@@ -32,6 +32,7 @@ class physical_raven:
         self.next_jp = np.zeros((2, 7))
         self.jr = np.zeros((2, 7))
         self.curr_tm = [0, 0]
+        self.curr_dh = prd.HOME_DH
 
         self.dance_scale_joints = prd.DANCE_SCALE_JOINTS
         self.loop_rate = prd.LOOP_RATE
@@ -85,7 +86,7 @@ class physical_raven:
             self.next_jp[i] = self.start_jp[i]
             # self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.Z_ROT[i])
             self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
-            self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.X_ROT)
+            # self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.X_ROT)
 
 
     def home_fast(self):
@@ -103,6 +104,9 @@ class physical_raven:
         #
         # if not all(self.homed):
         #     print("Raven could not be homed, please try again :(")
+
+    def home_grasper(self, arm):
+        self.curr_dh[arm] = prd.HOME_DH[arm]
 
     def sine_dance(self):
         # if self.i == 0:
@@ -328,7 +332,7 @@ class physical_raven:
         print(new_jp)
         self.next_jp[arm] = new_jp
 
-    def plan_move_abs(self, arm, tm, gangle, p5=False, home_dh=prd.HOME_DH):
+    def plan_move_abs(self, arm, tm, gangle, p5=False, delta_dh=None):
         """
         Plans a move using the absolute cartesian position
         Args:
@@ -339,16 +343,26 @@ class physical_raven:
             home_dh (array) : array containing home position, or desired postion of the
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
+        # update curr_tm
         self.start_jp[arm] = self.next_jp[arm]
-        # print(tm)
-        # tm = np.matmul(tm, prd.IDENTITY)
-        # tm = np.matmul(prd.X_ROT, tm)
-        # print(tm)
-        # self.curr_tm[arm] += tm
         self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
-        # print("curr_tm: ", self.curr_tm[arm])
+
+        # update curr_dh
+        if delta_dh is not None:
+            if not arm:
+                if abs(self.curr_dh[0][3] - delta_dh[0][3] / 10) < math.pi:
+                    self.curr_dh[0][3] += delta_dh[0][3]
+                if abs(self.curr_dh[0][4] - delta_dh[0][4] / 10) < 2:
+                    self.curr_dh[0][4] += delta_dh[0][4]
+            else:
+                if abs(self.curr_dh[1][3] + delta_dh[1][3] / 10) < math.pi:
+                    self.curr_dh[1][3] += delta_dh[1][3]
+                if abs(self.curr_dh[1][4] + delta_dh[1][4] / 10) < 2:
+                    self.curr_dh[1][4] += delta_dh[1][4]
+
+        # generate new_jp
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, home_dh, prd)
+            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, self.curr_dh, prd)
         else:
             jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle, prd)
         self.limited[arm] = jpl[1]

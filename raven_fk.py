@@ -1,6 +1,7 @@
 # from physical_raven_def import *
 import math as m
 import numpy as np
+import ambf_raven_def as ard
 
 def joint_to_dhvalue(joint, arm, raven_def):
     success = False
@@ -135,3 +136,11 @@ def fwd_kinematics_p5(arm, input_joint_pos, raven_def):
 
 
     return output_transformation
+
+def main():
+
+
+    dh_vals_l = joint_to_dhvalue(ard.HOME_JOINTS, 0, ard)
+    print(dh_vals_l)
+
+main()

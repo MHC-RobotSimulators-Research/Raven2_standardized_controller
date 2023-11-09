@@ -100,7 +100,7 @@ def update_pos_two_arm(controller):
     return delta_tm, gangle
 
 
-def update_pos_one_arm(controller, arm, curr_dh):
+def update_pos_one_arm(controller, arm):
     """
     Generates position and grasper jpos offsets for one arm using a xbox controller as input
     Args:
@@ -123,6 +123,10 @@ def update_pos_one_arm(controller, arm, curr_dh):
 
     gangle = [0, 0]
 
+    delta_dh = np.array([[0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0]],
+                       dtype="float")
+
     # Cartesian control of desired arm
     if controller[0][3] == 1 and DEADZONE < abs(controller[0][1]):
         delta_tm[arm][2, 3] = -controller[0][1] / DIV
@@ -139,12 +143,10 @@ def update_pos_one_arm(controller, arm, curr_dh):
 
         # Set right j4
         if DEADZONE < abs(controller[1][0]):
-            if abs(curr_dh[0][3] - controller[1][0] / 10) < m.pi:
-                curr_dh[0][3] += -controller[1][0] / 10
+            delta_dh[0][3] += -controller[1][0] / 10
         # Position j5
         if DEADZONE < abs(controller[1][1]):
-            if abs(curr_dh[0][4] - controller[1][1] / 10) < 2:
-                curr_dh[0][4] += -controller[1][1] / 10
+            delta_dh[0][4] += -controller[1][1] / 10
 
     # Right arm
     else:
@@ -153,14 +155,12 @@ def update_pos_one_arm(controller, arm, curr_dh):
 
         # Set right j4
         if DEADZONE < abs(controller[1][0]):
-            if abs(curr_dh[1][3] + controller[1][0] / 10) < m.pi:
-                curr_dh[1][3] += controller[1][0] / 10
+            delta_dh[1][3] += controller[1][0] / 10
         # Position j5
         if DEADZONE < abs(controller[1][1]):
-            if abs(curr_dh[1][4] + controller[1][1] / 10) < 2:
-                curr_dh[1][4] += controller[1][1] / 10
+            delta_dh[1][4] += controller[1][1] / 10
 
-    return delta_tm, gangle, curr_dh
+    return delta_tm, gangle, delta_dh
 
 
 def rumble_if_limited(raven, xbc):
@@ -197,10 +197,6 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
     arm_control = [True, True]
     # True for p5 ik and false for standard ik
     ik_mode = True
-    # Current DH values for each arm, defaults to home position
-    curr_dh = np.array([[1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., 0., 0.52359878],
-                        [1.04719755, 1.88495559, -0.03, 2.35619449 - m.pi / 2, 0., -0., 0.52359878]],
-                       dtype="float")
 
     while CONTROL[0]:
 
@@ -316,10 +312,12 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
 
             # Home left gripper
             if controller[2][2]:
-                curr_dh[0] = ard.HOME_DH[0]
+                for raven in ravens:
+                    raven.home_grasper(0)
             # Home right gripper
             if controller[2][3]:
-                curr_dh[1] = ard.HOME_DH[1]
+                for raven in ravens:
+                    raven.home_grasper(1)
 
             for raven in ravens:
                 # Control both raven arms
@@ -327,8 +325,8 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                     # modify position using controller inputs
                     delta_tm, gangle = update_pos_two_arm(controller)
                     # Plan next move based off of modified cartesian coordinates
-                    raven.plan_move_abs(0, delta_tm[0], gangle[0], ik_mode, curr_dh)
-                    raven.plan_move_abs(1, delta_tm[1], gangle[1], ik_mode, curr_dh)
+                    raven.plan_move_abs(0, delta_tm[0], gangle[0], ik_mode)
+                    raven.plan_move_abs(1, delta_tm[1], gangle[1], ik_mode)
 
                     if not raven.get_raven_type():
                         try:
@@ -345,9 +343,9 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                     if arm_control[1]:
                         arm = 1
                     # modify position using controller inputs
-                    delta_tm, gangle, curr_dh = update_pos_one_arm(controller,arm, curr_dh)
+                    delta_tm, gangle, delta_dh = update_pos_one_arm(controller,arm)
                     # Plan new position based off of desired cartesian changes
-                    raven.plan_move_abs(arm, delta_tm[arm], gangle[arm], True, curr_dh)
+                    raven.plan_move_abs(arm, delta_tm[arm], gangle[arm], True, delta_dh)
 
                     if not raven.get_raven_type():
                         try:
