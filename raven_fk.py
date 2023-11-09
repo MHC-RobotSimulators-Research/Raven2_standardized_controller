@@ -137,10 +137,10 @@ def fwd_kinematics_p5(arm, input_joint_pos, raven_def):
 
     return output_transformation
 
-def main():
-
-
-    dh_vals_l = joint_to_dhvalue(ard.HOME_JOINTS, 0, ard)
-    print(dh_vals_l)
-
-main()
+# def main():
+#
+#
+#     dh_vals_l = joint_to_dhvalue(ard.HOME_JOINTS, 0, ard)
+#     print(dh_vals_l)
+#
+# main()

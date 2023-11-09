@@ -32,7 +32,7 @@ class physical_raven:
         self.next_jp = np.zeros((2, 7))
         self.jr = np.zeros((2, 7))
         self.curr_tm = [0, 0]
-        self.curr_dh = prd.HOME_DH
+        self.curr_dh = prd.HOME_DH.copy()
 
         self.dance_scale_joints = prd.DANCE_SCALE_JOINTS
         self.loop_rate = prd.LOOP_RATE
@@ -362,7 +362,7 @@ class physical_raven:
 
         # generate new_jp
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, self.curr_dh, prd)
+            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, self.curr_dh[arm], prd)
         else:
             jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle, prd)
         self.limited[arm] = jpl[1]

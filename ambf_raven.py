@@ -35,7 +35,7 @@ class ambf_raven:
         self.home_joints = ard.HOME_JOINTS
         self.next_jp = np.zeros((2, 7))
         self.curr_tm = [0, 0]
-        self.curr_dh = ard.HOME_DH
+        self.curr_dh = ard.HOME_DH.copy()
 
         self.dance_scale_joints = ard.DANCE_SCALE_JOINTS
         self.loop_rate = ard.LOOP_RATE
@@ -332,7 +332,7 @@ class ambf_raven:
 
         # generate new_jp
         if p5:
-            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, self.curr_dh, ard)
+            jpl = ik.inv_kinematics_p5(arm, self.curr_tm[arm], gangle, self.curr_dh[arm], ard)
         else:
             jpl = ik.inv_kinematics(arm, self.curr_tm[arm], gangle, ard)
         self.limited[arm] = jpl[1]

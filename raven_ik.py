@@ -275,7 +275,7 @@ def inv_kinematics_p5(arm, input_cp, input_gangle, home_dh, raven_def):
     # Assign theta 4,5, and 6 to their desired values for all iksol
     for i in range(numsols):
         for j in range(3, 6):
-            iksol[i, j] = home_dh[arm, j]
+            iksol[i, j] = home_dh[j]
 
     # I don't think this is needed?
     # if not joint_to_dhvalue(HOME_JOINTS, 1):

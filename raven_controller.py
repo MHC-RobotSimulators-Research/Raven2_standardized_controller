@@ -313,10 +313,12 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             # Home left gripper
             if controller[2][2]:
                 for raven in ravens:
+                    print("homing left grasper")
                     raven.home_grasper(0)
             # Home right gripper
             if controller[2][3]:
                 for raven in ravens:
+                    print("homing right grasper")
                     raven.home_grasper(1)
 
             for raven in ravens:
