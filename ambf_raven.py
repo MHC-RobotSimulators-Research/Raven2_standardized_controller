@@ -117,7 +117,7 @@ class ambf_raven:
             jpos = self.arms[i].get_all_joint_pos()
             # convert jpos to degrees
             for i in range(len(jpos)):
-                jpos[i] = jpos[i] * ard.Deg2Rad
+                jpos[i] = jpos[i] * ard.Rad2Deg
             jpos.insert(3, 0)
             status.extend(jpos)
             # status.extend(self.arms[i].get_all_joint_pos().insert(3, 0))  # 7 numbers
