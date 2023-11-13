@@ -45,7 +45,7 @@ class ambf_raven:
         self.i = 0
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
-        self.man_steps = 30
+        self.man_steps = 12 # 30 * (ard.COMMAND_RATE / 1000)
 
         self.homed = [False, False]
         self.moved = [False, False]
@@ -54,22 +54,43 @@ class ambf_raven:
 
         print("\nHoming...\n")
         self.home_fast()
-        self.set_curr_tm()
         print(self.curr_tm)
 
     def get_raven_type(self):
         return self.raven_type
 
-    def set_curr_tm(self):
+    def set_curr_tm(self, p5=False):
         for i in range(len(self.arms)):
             self.start_jp[i] = self.arms[i].get_all_joint_pos()
-            self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], ard)
+            self.next_jp[i] = self.start_jp[i].copy()
+            if p5:
+                self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], ard)
+                print("set tm with p5 kinematics")
+            else:
+                self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], ard)
+                print("set tm with standard kinematics")
+
 
     def home_fast(self):
-        self.set_curr_tm()
+        self.set_curr_tm(True)
         self.next_jp = [self.home_joints, self.home_joints]
         self.move()
-        self.set_curr_tm()
+        self.set_curr_tm(True)
+
+        # # left arm
+        # self.curr_tm[0][0,3] = 0.313776283
+        # self.curr_tm[0][1,3] = 0.098091582
+        # self.curr_tm[0][2,3] = -0.101179060
+        #
+        # # right arm
+        # self.curr_tm[1][0,3] = -0.313776283
+        # self.curr_tm[1][1,3] = 0.098091582
+        # self.curr_tm[1][2,3] = -0.101179060
+        #
+        # self.plan_move_abs(0, ard.IDENTITY, 1, True)
+        # self.plan_move_abs(1, ard.IDENTITY, 1, True)
+        #
+        # self.move()
 
         # for j in range(len(self.moved)):
         #     self.homed[j] = self.moved[j]

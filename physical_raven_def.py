@@ -24,24 +24,24 @@ COMMAND_TIME = 1 / COMMAND_RATE
 Eps          = sys.float_info.epsilon
 
 MAX_JR             = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad], dtype="float") / COMMAND_RATE
-MAX_JOINTS         = np.array([  m.pi,         m.pi,  0.10,            m.pi,   2, (m.pi * 3)/4, (m.pi * 3)/4],  dtype = 'float')
-MIN_JOINTS         = np.array([ -m.pi,        -m.pi, -0.17,           -m.pi,  -2,            0,            0],  dtype = 'float')
-HOME_JOINTS        = np.array([0.5217216610908508, 1.5799641609191895, 0.40040287375450134, 0.06240818649530411, -0.006050971802324057, 0.7633852362632751, 0.7971110939979553],dtype = 'float')
-HOME_DH            = np.array([[ 0.52172166,  1.57996416,  0.40040287,  0.06240819, 0, 0, 0.79711109],
-                                [ 0.52172166,  1.57996416,  0.40040287,  0.06240819, 0,  0, 0.79711109]],
-                                dtype="float")
-DANCE_SCALE_JOINTS = np.array([   0.3,          0.3,  0.06,             0.3, 1.2,       m.pi/6,       m.pi/6],  dtype = 'float')
+MAX_JOINTS         = np.array([90 * Deg2Rad, 135 * Deg2Rad, 0.56, m.pi, 2, (m.pi * 3)/4, (m.pi * 3)/4],  dtype = 'float')
+MIN_JOINTS         = np.array([0, 45 * Deg2Rad, 0.23, -m.pi, -2, 0, 0],  dtype = 'float')
+HOME_JOINTS        = np.array([m.pi / 6, m.pi / 2, 0.4, 0, 0, m.pi / 4, m.pi / 4], dtype='float')
+# HOME_JOINTS        = np.array([0.5217216610908508, 1.5799641609191895, 0.40040287375450134, 0.06240818649530411, -0.006050971802324057, 0.7633852362632751, 0.7971110939979553],dtype = 'float')
+HOME_DH            = np.array([[0.52359878, 1.57079633, 0.4, 0., 0., 0., 0.78539816],
+                               [0.52359878, 1.57079633, 0.4, 0., 0., -0., 0.78539816]], dtype="float")
+DANCE_SCALE_JOINTS = np.array([0.3, 0.3, 0.06, 0.3, 1.2, m.pi/6, m.pi/6],  dtype='float')
 
-RAVEN_JOINT_LIMITS = np.array([[    0.0,          m.pi/4,           0.23, -m.pi*2, -2, -2, -2],
+RAVEN_JOINT_LIMITS = np.array([[0.0, m.pi/4, 0.23, -m.pi*2, -2, -2, -2],
                                [m.pi/2, (m.pi*3)/4, 0.56, m.pi*2, 2, 2, 2]])
-RAVEN_DH_ALPHA     = np.array([[     0, np.deg2rad(75), np.deg2rad(128),     0, m.pi/2, m.pi/2, 0],
-                               [  m.pi,  np.deg2rad(-75),  np.deg2rad(52),     0, m.pi/2, m.pi/2, 0]], dtype = 'float')
-RAVEN_DH_THETA     = np.array([[     V,               V,          m.pi/2,     V,      V,      V, 0],
-                               [     V,               V,         -m.pi/2,     V,      V,      V, 0]], dtype = 'float')
-RAVEN_DH_A         = np.array([[     0,               0,               0,     0,      0,  0.013, 0],
-                               [     0,               0,               0,     0,      0,  0.013, 0]], dtype = 'float')
-RAVEN_DH_D         = np.array([[     0,               0,               V, -0.482,      0,      0, 0],
-                               [     0,               0,               V, -0.482,      0,      0, 0]], dtype = 'float')
+RAVEN_DH_ALPHA     = np.array([[0, np.deg2rad(75), np.deg2rad(128), 0, m.pi/2, m.pi/2, 0],
+                               [m.pi, np.deg2rad(-75), np.deg2rad(52), 0, m.pi/2, m.pi/2, 0]], dtype = 'float')
+RAVEN_DH_THETA     = np.array([[V, V, m.pi/2, V, V, V, 0],
+                               [V, V, -m.pi/2, V, V, V, 0]], dtype='float')
+RAVEN_DH_A         = np.array([[0, 0, 0, 0, 0, 0.013, 0],
+                               [0, 0, 0, 0, 0, 0.013, 0]], dtype='float')
+RAVEN_DH_D         = np.array([[0, 0, V, -0.47, 0, 0, 0],
+                               [0, 0, V, -0.47, 0, 0, 0]], dtype='float')
 
 RAVEN_IKIN_PARAM   = np.array([float(m.sin(RAVEN_DH_ALPHA[0][1])),
                                 float(m.cos(RAVEN_DH_ALPHA[0][1])),
@@ -53,8 +53,8 @@ RAVEN_T_B0         = np.array([np.matrix([[0, 0,  1,  0.30071], [0, -1, 0, 0.061
                                np.matrix([[0, 0, -1, -0.30071], [0,  1, 0, 0.061], [1, 0, 0, -0.007], [0, 0, 0, 1]], dtype = 'float')])
 RAVEN_T_CB         = np.matrix([[1, 0, 0, 0],[0, 1, 0, 0],[0, 0, 1, 0], [0, 0, 0, 1]], dtype='float') #using quaternion to rotational translator
 
-Z_ROT = np.array([np.matrix([[m.cos(np.deg2rad(25)), -m.sin(np.deg2rad(25)), 0, 0], [m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float'),
-                  np.matrix([[m.cos(np.deg2rad(-25)), -m.sin(np.deg2rad(-25)), 0, 0], [m.sin(np.deg2rad(-25)), m.cos(np.deg2rad(-25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')])
+Z_ROT = np.array([np.matrix([[m.cos(np.deg2rad(-25)), -m.sin(np.deg2rad(-25)), 0, 0], [m.sin(np.deg2rad(-25)), m.cos(np.deg2rad(-25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float'),
+                  np.matrix([[m.cos(np.deg2rad(25)), -m.sin(np.deg2rad(25)), 0, 0], [m.sin(np.deg2rad(25)), m.cos(np.deg2rad(25)), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype='float')])
 
 x_rot_val = 30
 X_ROT = np.matrix([[1, 0, 0, 0],

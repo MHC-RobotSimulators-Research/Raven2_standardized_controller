@@ -19,7 +19,10 @@ cube tracing and soft body manipulation'''
 class physical_raven:
     def __init__(self):
 
-        rospy.init_node('raven_keyboard_controller', anonymous=True)
+        try:
+            rospy.init_node('raven_keyboard_controller', anonymous=True)
+        except:
+            pass
 
         self.arm_ctl_l = physical_raven_arm(name_space = ' ', robot_name = 'arm1', grasper_name = 'grasp1')
         self.arm_ctl_r = physical_raven_arm(name_space = ' ', robot_name = 'arm2', grasper_name = 'grasp2')
@@ -42,7 +45,7 @@ class physical_raven:
         self.i = 0
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
-        self.man_steps = 30
+        self.man_steps = 30 # 30 * (prd.COMMAND_RATE / 1000)
 
         self.homed = [False, False]
         self.moved = [False, False]
@@ -51,7 +54,7 @@ class physical_raven:
 
         # print("\nHoming...\n")
         # self.home_fast()
-        self.set_curr_tm()
+        self.set_curr_tm(True)
         print(self.curr_tm)
         print(self.start_jp)
         # self.resume()
@@ -67,7 +70,7 @@ class physical_raven:
         self.arm_ctl_l.pub_state_command('pause')
         self.arm_ctl_r.pub_state_command('pause')
 
-    def set_curr_tm(self):
+    def set_curr_tm(self, p5=False):
         success = False
         while not success:
             time.sleep(1)
@@ -84,17 +87,19 @@ class physical_raven:
 
         for i in range(len(self.arms)):
             self.next_jp[i] = self.start_jp[i]
-            # self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.Z_ROT[i])
-            self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
-            # self.curr_tm[i] = np.matmul(fk.fwd_kinematics_p5(i, self.start_jp[i], prd), prd.X_ROT)
+            self.next_jp[i] = self.start_jp[i].copy()
+            if p5:
+                self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
+            else:
+                self.curr_tm[i] = fk.fwd_kinematics(i, self.start_jp[i], prd)
 
 
     def home_fast(self):
 
-        self.set_curr_tm()
+        self.set_curr_tm(True)
         self.next_jp = [self.home_joints, self.home_joints]
         self.move()
-        self.set_curr_tm()
+        self.set_curr_tm(True)
 
         # for j in range(len(self.moved)):
         #     self.homed[j] = self.moved[j]
@@ -408,7 +413,7 @@ class physical_raven:
         for i in range(increments):
             self.arms[0].pub_jr_command(self.arms[0].seven2sixteen(self.jr[0]))
             self.arms[1].pub_jr_command(self.arms[1].seven2sixteen(self.jr[1]))
-            # time.sleep(prd.COMMAND_TIME)
+            time.sleep(prd.COMMAND_TIME)
 
     # def move_now(self, arm):
     #     """

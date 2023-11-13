@@ -136,20 +136,20 @@ def inv_kinematics(arm, input_cp, input_gangle, raven_def):
         T_3_6 = np.matmul(np.linalg.inv(T_0_3), T_0_6)
         T_3_6_B = u.get_Basis(T_3_6)
         T_3_6_O = u.get_Origin(T_3_6)
-        c5 = -float(T_3_6_B[2,2])
+        c5 = -float(T_3_6_B[2, 2])
         s5 = float(T_3_6_O[2] - raven_def.RAVEN_IKIN_PARAM[4]) / float(raven_def.RAVEN_IKIN_PARAM[5])
 
         if m.fabs(c5) > raven_def.Eps:
             c4 = float(T_3_6_O[0]) / float(raven_def.RAVEN_IKIN_PARAM[5] * c5)
             s4 = float(T_3_6_O[1]) / float(raven_def.RAVEN_IKIN_PARAM[5] * c5)
         else:
-            c4 = T_3_6_B[0][2] / s5
-            s4 = T_3_6_B[1][2] / s5
+            c4 = T_3_6_B[0, 2] / s5
+            s4 = T_3_6_B[1, 2] / s5
         iksol[i][3] = m.atan2(s4, c4)
         iksol[i][4] = m.atan2(s5, c5)
         if m.fabs(s5) > raven_def.Eps:
-            c6 = T_3_6_B[2,0] / s5
-            s6 = -T_3_6_B[2,1] / s5
+            c6 = T_3_6_B[2, 0] / s5
+            s6 = -T_3_6_B[2, 1] / s5
         else:
             dh_theta[3] = iksol[i][3]
             dh_theta[4] = iksol[i][4]
@@ -190,11 +190,16 @@ def inv_kinematics_p5(arm, input_cp, input_gangle, home_dh, raven_def):
     # p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.RAVEN_T_CB, raven_def.RAVEN_T_B0[arm])), input_cp)
     # p05_dh = np.matmul(np.linalg.inv(raven_def.RAVEN_T_B0[arm]), input_cp)
     if raven_def.RAVEN_TYPE:
-        p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.X_ROT, raven_def.RAVEN_T_B0[arm])), input_cp)
+        # p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.X_ROT, raven_def.RAVEN_T_B0[arm])), input_cp)
+        p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.RAVEN_T_B0[arm], raven_def.Z_ROT[arm])), input_cp)
+
     else:
         # p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.RAVEN_T_CB, raven_def.RAVEN_T_B0[arm])), input_cp)
+        # p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.X_ROT, raven_def.RAVEN_T_B0[arm])), input_cp)
+        # p05_dh = input_cp
         # p05_dh = np.matmul(np.linalg.inv(raven_def.RAVEN_T_B0[arm]), input_cp)
-        p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.X_ROT, raven_def.RAVEN_T_B0[arm])), input_cp)
+        p05_dh = np.matmul(np.linalg.inv(np.matmul(raven_def.RAVEN_T_B0[arm], raven_def.Z_ROT[arm])), input_cp)
+
 
     p05 = np.array([p05_dh[0, 3], p05_dh[1, 3], p05_dh[2, 3], 1.0], dtype="float")
 

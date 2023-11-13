@@ -305,9 +305,13 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             # Set kinematics mode
             if controller[2][0]:
                 ik_mode = True
+                for raven in ravens:
+                    raven.set_curr_tm(True)
                 print("Using p5 inverse kinematics")
             elif controller[2][1]:
                 ik_mode = False
+                for raven in ravens:
+                    raven.set_curr_tm(False)
                 print("Using standard inverse kinematics")
 
             # Home left gripper
