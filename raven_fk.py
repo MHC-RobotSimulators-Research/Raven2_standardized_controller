@@ -149,7 +149,7 @@ def fwd_kinematics_p5(arm, input_joint_pos, raven_def):
 def main():
 
 
-    # dh_vals_l = joint_to_dhvalue(prd.HOME_JOINTS, 1, ard)
+    # dh_vals_l = joint_to_dhvalue(ard.HOME_JOINTS, 1, ard)
     # print(dh_vals_l)
     # print(fwd_kinematics(0, prd.HOME_JOINTS, prd))
     # print(fwd_kinematics(1, prd.HOME_JOINTS, prd))

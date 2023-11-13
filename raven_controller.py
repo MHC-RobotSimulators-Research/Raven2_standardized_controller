@@ -89,7 +89,7 @@ def update_pos_two_arm(controller):
         else:
             # note x and y are swapped to make controls more intuitive
             if DEADZONE < abs(controller[arm][0]):
-                delta_tm[arm][0, 3] = -controller[arm][0] / DIV
+                delta_tm[arm][0, 3] = controller[arm][0] / DIV
                 # pass
             if DEADZONE < abs(controller[arm][1]):
                 delta_tm[arm][1, 3] = -controller[arm][1] / DIV
@@ -132,7 +132,7 @@ def update_pos_one_arm(controller, arm):
         delta_tm[arm][2, 3] = -controller[0][1] / DIV
     else:
         if DEADZONE < abs(controller[0][0]):
-            delta_tm[arm][0, 3] = -controller[0][0] / DIV
+            delta_tm[arm][0, 3] = controller[0][0] / DIV
         if DEADZONE < abs(controller[0][1]):
             delta_tm[arm][1, 3] = -controller[0][1] / DIV
 

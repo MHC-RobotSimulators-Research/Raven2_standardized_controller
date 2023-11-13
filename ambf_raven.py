@@ -73,7 +73,10 @@ class ambf_raven:
 
     def home_fast(self):
         self.set_curr_tm(True)
-        self.next_jp = [self.home_joints, self.home_joints]
+        hj_r = self.home_joints.copy()
+        hj_r[5] *= -1
+        hj_r[6] *= -1
+        self.next_jp = [self.home_joints, hj_r]
         self.move()
         self.set_curr_tm(True)
 
@@ -136,6 +139,14 @@ class ambf_raven:
         # Add jpos for both arms
         for i in range(len(self.arms)):
             jpos = self.arms[i].get_all_joint_pos()
+            # fix negative right arm grasper
+            if i:
+                jpos[5] *= -1
+                jpos[6] *= -1
+            # apply offset to joint 3
+            jpos[2] += 0.46
+            # apply offset to joint 4
+            jpos[3] -= math.pi * 3 /4
             # convert jpos to degrees
             for i in range(len(jpos)):
                 jpos[i] = jpos[i] * ard.Rad2Deg
@@ -334,7 +345,7 @@ class ambf_raven:
         # update curr_tm
         if arm == 1:
             gangle = -gangle
-        tm[0, 3] *= -1
+        # tm[0, 3] *= -1
         self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
 
