@@ -80,21 +80,6 @@ class ambf_raven:
         self.move()
         self.set_curr_tm(True)
 
-        # # left arm
-        # self.curr_tm[0][0,3] = 0.313776283
-        # self.curr_tm[0][1,3] = 0.098091582
-        # self.curr_tm[0][2,3] = -0.101179060
-        #
-        # # right arm
-        # self.curr_tm[1][0,3] = -0.313776283
-        # self.curr_tm[1][1,3] = 0.098091582
-        # self.curr_tm[1][2,3] = -0.101179060
-        #
-        # self.plan_move_abs(0, ard.IDENTITY, 1, True)
-        # self.plan_move_abs(1, ard.IDENTITY, 1, True)
-        #
-        # self.move()
-
         # for j in range(len(self.moved)):
         #     self.homed[j] = self.moved[j]
 
@@ -331,12 +316,12 @@ class ambf_raven:
         new_jp = jpl[0]
         self.next_jp[arm] = new_jp
 
-    def plan_move_abs(self, arm, tm, gangle, p5=False, delta_dh=None,):
+    def plan_move_abs(self, arm, delta_tm, gangle, p5=False, delta_dh=None, ):
         """
         Plans a move using the absolute cartesian position
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
-            tm (numpy.array) : desired transformation matrix changes
+            delta_tm (numpy.array) : desired transformation matrix changes
             gangle (float) : the gripper angle, 0 is closed
             p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
             delta_dh (array) : array containing home position, or desired postion of the
@@ -347,7 +332,7 @@ class ambf_raven:
             gangle = -gangle
         # tm[0, 3] *= -1
         self.start_jp[arm] = self.next_jp[arm]
-        self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
+        self.curr_tm[arm] = np.matmul(delta_tm, self.curr_tm[arm])
 
         # update curr_dh
         if delta_dh is not None:
