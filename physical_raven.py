@@ -337,20 +337,20 @@ class physical_raven:
         print(new_jp)
         self.next_jp[arm] = new_jp
 
-    def plan_move_abs(self, arm, tm, gangle, p5=False, delta_dh=None):
+    def plan_move_abs(self, arm, delta_tm, gangle, p5=False, delta_dh=None):
         """
         Plans a move using the absolute cartesian position
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
-            tm (numpy.array) : desired transformation matrix changes
+            delta_tm (numpy.array) : desired transformation matrix changes
             gangle (float) : the gripper angle, 0 is closed
             p5 (bool) : when false uses standard kinematics, when true uses p5 kinematics
             home_dh (array) : array containing home position, or desired postion of the
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
         # update curr_tm
-        self.start_jp[arm] = self.next_jp[arm]
-        self.curr_tm[arm] = np.matmul(tm, self.curr_tm[arm])
+        self.start_jp[arm] = self.arms[arm].get_measured_jpos()
+        self.curr_tm[arm] = np.matmul(delta_tm, self.curr_tm[arm])
 
         # update curr_dh
         if delta_dh is not None:
