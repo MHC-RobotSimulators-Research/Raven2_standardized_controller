@@ -43,7 +43,7 @@ control[3] = File Mode: controller inputs
 control[4] = File Mode: jpos
 control[5] = Sine Dance
 '''
-DEADZONE = 0.1  # controller axes must move beyond this before they register as an input, prevents drift
+DEADZONE = 0.15  # controller axes must move beyond this before they register as an input, prevents drift
 DIV = 500  # amount raw input values are divided by to produce motion
 ALLOW_FAKE_CONTROLLER = True
 RECORD = False
@@ -70,30 +70,28 @@ def update_pos_two_arm(controller):
     global DEADZONE
     global DIV
 
-    delta_tm = [np.matrix([[1, 0, 0, 0],
-                          [0, 1, 0, 0],
-                          [0, 0, 1, 0],
-                          [0, 0, 0, 1]], dtype=float),
-                np.matrix([[1, 0, 0, 0],
-                           [0, 1, 0, 0],
-                           [0, 0, 1, 0],
-                           [0, 0, 0, 1]], dtype=float)]
+    delta_tm = [np.matrix([[1., 0., 0., 0.],
+                          [0., 1., 0., 0.],
+                          [0., 0., 1., 0.],
+                          [0., 0., 0., 1.]], dtype=float),
+                np.matrix([[1., 0., 0., 0.],
+                           [0., 1., 0., 0.],
+                           [0., 0., 1., 0.],
+                           [0., 0., 0., 1.]], dtype=float)]
 
     gangle = [0, 0]
 
     # Update coordinates for both arms
     for arm in range(2):
-        if controller[arm][3] == 1 and DEADZONE < abs(controller[arm][1]):
-            delta_tm[arm][2, 3] = -controller[arm][1] / DIV
-            # delta_tm[arm][0, 3] = -controller[arm][1] / DIV
-        else:
-            # note x and y are swapped to make controls more intuitive
-            if DEADZONE < abs(controller[arm][0]):
+        if DEADZONE < m.sqrt(controller[arm][1] ** 2 + controller[arm][1] ** 2):
+            if controller[arm][3]:
+                delta_tm[arm][2, 3] = -controller[arm][1] / DIV
+
+            else:
+                # note x and y are swapped to make controls more intuitive
                 delta_tm[arm][0, 3] = controller[arm][0] / DIV
-                # pass
-            if DEADZONE < abs(controller[arm][1]):
                 delta_tm[arm][1, 3] = -controller[arm][1] / DIV
-                # pass
+
         # Set gripper angles
         gangle[arm] = 1 - (controller[arm][2] / 4)
 
@@ -128,12 +126,12 @@ def update_pos_one_arm(controller, arm):
                        dtype="float")
 
     # Cartesian control of desired arm
-    if controller[0][3] == 1 and DEADZONE < abs(controller[0][1]):
-        delta_tm[arm][2, 3] = -controller[0][1] / DIV
-    else:
-        if DEADZONE < abs(controller[0][0]):
+    if DEADZONE < m.sqrt(controller[0][1] ** 2 + controller[0][1] ** 2):
+        if controller[0][3]:
+            delta_tm[arm][2, 3] = -controller[0][1] / DIV
+        else:
             delta_tm[arm][0, 3] = controller[0][0] / DIV
-        if DEADZONE < abs(controller[0][1]):
+
             delta_tm[arm][1, 3] = -controller[0][1] / DIV
 
     # Left arm
@@ -206,6 +204,9 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
             '''
             for raven in ravens:
                 raven.home_fast()
+                raven.home_grasper(0)
+                raven.home_grasper(1)
+                arm_control = [True, True]
                 control_reset()
 
         if CONTROL[2] and xbc is None:
