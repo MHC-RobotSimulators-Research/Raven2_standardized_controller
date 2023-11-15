@@ -45,7 +45,7 @@ Rad2Deg = 180.0 / np.pi
 
 import raven_fk as fk
 import raven_ik as ik 
-import ambf_raven_def as ard
+import physical_raven_def as prd
 
 
 class physical_raven_arm():
@@ -88,7 +88,7 @@ class physical_raven_arm():
         self.pub_count_motion = 0 # The counts or how many motion command messages are sent
         # temp_measured_joint: replace measured_jpos when cannot connect with raven computer
         # size 15 to match with measured_joint, when start set it to home_joints
-        self.temp_measured_jpos = ard.HOME_JOINTS
+        self.temp_measured_jpos = prd.HOME_JOINTS
         # add xbox controller
         # initualize steps from current increment to new joint positions
         self.man_step = 20
@@ -248,7 +248,7 @@ class physical_raven_arm():
     # [Return]: self.operate_state - String, one of "DISABLED", "ENABLED", "PAUSED", "FAULT", robot can only be controlled when "ENABLED"
     def get_robot_state(self):
 
-        return  self.operate_state
+        return self.operate_state
 
     # [IMPT]: the joint_command is an np.array of dimension 16, please notice that the first entry is always 0 and does nothing, 
     #         this is to make the command consistent and intuitive - command[1] is joint 1 and [2] is joint 2, so on and so forth.
@@ -256,6 +256,7 @@ class physical_raven_arm():
     # [Input ]: joint_command - an np.array of dimension 16, joint_command[1] should be the expected velocity of joint 1 (rad and m /sec)
     # [Return]: -1 if command not published, 0 if command published normally
     # [Note]: There is no clear reason why the dimension of the joint command is 15 in CRTK RAVEN. But it is confirmed that this is not to control 2 arms. Each arm should have its own controller node
+
     def pub_jr_command(self, joint_command):
         # joint_command = np.array([0.0005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005,  0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005]) # This is the max velocity of jr command, should be rad/sec and m/sec for rotation and translation joints 
 
