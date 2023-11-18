@@ -45,7 +45,7 @@ class ambf_raven:
         self.i = 0
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
-        self.man_steps = 12 # 30 * (ard.COMMAND_RATE / 1000)
+        self.man_steps = 4 # 30 * (ard.COMMAND_RATE / 1000)
 
         self.homed = [False, False]
         self.moved = [False, False]
