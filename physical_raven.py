@@ -45,7 +45,7 @@ class physical_raven:
         self.i = 0
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
-        self.man_steps = 30 # 30 * (prd.COMMAND_RATE / 1000)
+        self.man_steps = 20 # 30 * (prd.COMMAND_RATE / 1000)
 
         self.homed = [False, False]
         self.moved = [False, False]
@@ -86,7 +86,6 @@ class physical_raven:
                         print("Unable to get Raven position, trying again...")
 
         for i in range(len(self.arms)):
-            self.next_jp[i] = self.start_jp[i]
             self.next_jp[i] = self.start_jp[i].copy()
             if p5:
                 self.curr_tm[i] = fk.fwd_kinematics_p5(i, self.start_jp[i], prd)
@@ -349,7 +348,6 @@ class physical_raven:
                 joints not set by cartesian coordinates in inv_kinematics_p5
         """
         # update curr_tm
-        self.start_jp[arm] = self.arms[arm].get_measured_jpos()
         self.curr_tm[arm] = np.matmul(delta_tm, self.curr_tm[arm])
 
         # update curr_dh
@@ -385,7 +383,7 @@ class physical_raven:
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
         """
-
+        self.start_jp[arm] = self.arms[arm].get_measured_jpos()
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
         # print("arm", arm, " delta_jp: ", self.delta_jp[arm])
 
@@ -411,9 +409,9 @@ class physical_raven:
             # print(self.jr[i])
 
         for i in range(increments):
-            self.arms[0].pub_jr_command(self.arms[0].seven2sixteen(self.jr[0]))
-            self.arms[1].pub_jr_command(self.arms[1].seven2sixteen(self.jr[1]))
-            time.sleep(prd.COMMAND_TIME)
+            self.arms[0].pub_jr_command(self.jr[0])
+            self.arms[1].pub_jr_command(self.jr[1])
+            # dont need, the publisher checks to ensure commands are appropriately spaced time.sleep(prd.COMMAND_TIME)
 
     # def move_now(self, arm):
     #     """

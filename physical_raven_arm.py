@@ -38,6 +38,8 @@ import geometry_msgs.msg
 import sensor_msgs.msg
 
 import crtk_msgs.msg  # crtk_msgs/operating_state
+
+import ambf_raven_def
 import utils_r2_py_controller as utils
 import raven_2.msg
 Deg2Rad = np.pi / 180.0
@@ -63,9 +65,9 @@ class physical_raven_arm():
 
         #add max_cr
         self.max_cr = 0.00018
-        self.rate_pub = 500 # !IMPT This is the publish rate of the motion command publisher. It must be tested, because it will affect the real time factor and thus affect the speed. If you are not sure or cannot test, use a large rate (such as 1000) can be safer.
-        self.rate_pub_cr = 1000
-        self.max_rate_move = 500 # This is a protection, if the time interval between 2 move command is shorter than 1/rate, the publisher will wait util 1/rate
+        self.rate_pub = prd.PUBLISH_RATE # !IMPT This is the publish rate of the motion command publisher. It must be tested, because it will affect the real time factor and thus affect the speed. If you are not sure or cannot test, use a large rate (such as 1000) can be safer.
+        self.rate_pub_cr = prd.PUBLISH_RATE
+        self.max_rate_move = prd.PUBLISH_RATE # This is a protection, if the time interval between 2 move command is shorter than 1/rate, the publisher will wait util 1/rate
         self.min_interval_move = 1.0/self.max_rate_move
         self.pos_scaler = 1000.0/self.rate_pub # This is to scale the pos command to meet the target velocity
         self.time_last_pub_move = -1.0
@@ -174,22 +176,9 @@ class physical_raven_arm():
         return self.measured_jpos
     
     def __check_max_jpose_command(self, joint_command):
-        max_jr = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad]) / 500 # This is the max velocity of jr command, should be rad/sec and m/sec for rotation and translation joints 
-
+        max_jr = prd.MAX_JR  # This is the max velocity of jr command, should be rad/sec and m/sec for rotation and translation joints
         diff = max_jr - np.abs(joint_command)
-        #print("max_jr: ", self.max_jr)
-        #print("joint command: ", joint_command)
-        #print("joint command",joint_command)
-        #joint 2: 0.785398163
-        #joint 3: -0.0000000000000000000555111512
-        #joint 6: -0.5
-        #joint 7: -0.5
-        #print("diff: ", diff)
-        #joint 1: 0.000174532925
-        #joint 2: -0.785223630
-        #joint 6: -0.5
-        #joint 7: -0.5
-        idx = np.array(np.where(diff<0))
+        idx = np.array(np.where(diff < 0))
 
         return idx[0]
 
@@ -257,13 +246,10 @@ class physical_raven_arm():
     # [Return]: -1 if command not published, 0 if command published normally
     # [Note]: There is no clear reason why the dimension of the joint command is 15 in CRTK RAVEN. But it is confirmed that this is not to control 2 arms. Each arm should have its own controller node
 
-    def pub_jr_command(self, joint_command):
-        # joint_command = np.array([0.0005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005,  0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005, 0.00005]) # This is the max velocity of jr command, should be rad/sec and m/sec for rotation and translation joints 
+    def pub_jr_command(self, jpos):
+        max_check = self.__check_max_jpose_command(jpos)
+        joint_command = self.seven2fifthteen(jpos)
 
-        joint_command = joint_command[1:] # This is to meet the format of CRTK, where joint 1 is at index 0
-        #joint_command[5] = 0
-        #joint_command[6] = 0
-        max_check = self.__check_max_jpose_command(joint_command)
         if max_check.size != 0:
             print('Command velocity too fast, joints: ')
             #print(max_check)
@@ -273,8 +259,6 @@ class physical_raven_arm():
         # print("joint command: ",joint_command)
         msg = sensor_msgs.msg.JointState()
         msg.position[:] = joint_command.flat
-        
-        max_check = self.__check_max_jpose_command(joint_command)
 
         interval_pub = time.time() - self.time_last_pub_move
         #print(str(interval_pub)) # [debug]
@@ -296,7 +280,7 @@ class physical_raven_arm():
     # [Input ]: target_jpos - in degree an np.array of dimension 16, target_jpos[1] should be the target pose of joint 1 (rad and m /sec) || max_vel in degree, an np.array of dimension 16
     # [Return]: 0 if finished moving
     # [Note]: There is no clear reason why the dimension of the joint command is 15 in CRTK RAVEN. But it is confirmed that this is not to control 2 arms. Each arm should have its own controller node
-    def go_to_jr(self, target_jpos, max_vel = np.array([0, 3*Deg2Rad, 3*Deg2Rad, 0.01, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad])):
+    def go_to_jr(self, target_jpos, max_vel = np.array([0, 3*Deg2Rad, 3*Deg2Rad, 0.005, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad])):
 
         target_jpos = target_jpos[1:]  # This is to meet the format of CRTK, where joint 1 is at index 0
         
@@ -372,7 +356,7 @@ class physical_raven_arm():
     
     # helper method to convert numpy array size 7 to np array size 15
     def seven2fifthteen (self, arr7):
-        return np.concatenate([np.zeros(1), arr7, np.zeros(7)])
+        return np.concatenate([arr7, np.zeros(8)])
     
     # convert array size 7 to 16 
     def seven2sixteen (self, arr7):
