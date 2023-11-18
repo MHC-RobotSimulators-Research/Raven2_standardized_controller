@@ -44,7 +44,7 @@ control[4] = File Mode: jpos
 control[5] = Sine Dance
 '''
 DEADZONE = 0.15  # controller axes must move beyond this before they register as an input, prevents drift
-DIV = 500  # amount raw input values are divided by to produce motion
+DIV = 2000  # amount raw input values are divided by to produce motion
 ALLOW_FAKE_CONTROLLER = True
 RECORD = False
 RECORDING = False
