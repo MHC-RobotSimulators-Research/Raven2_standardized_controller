@@ -71,7 +71,7 @@ class ambf_raven_grasping():
                                [False, False, False, False, False, False, False, False]]
 
     def set_grasp(self, arm, grasp):
-        self.grasp[arm] = grasp
+        self.grasp[arm] = not (grasp - 1)
 
     # def grasp_button_cb(self):
     #     self.grasp = True

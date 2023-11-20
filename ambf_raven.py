@@ -38,14 +38,14 @@ class ambf_raven:
         self.curr_dh = ard.HOME_DH.copy()
 
         self.dance_scale_joints = ard.DANCE_SCALE_JOINTS
-        self.loop_rate = ard.LOOP_RATE
+        self.loop_rate = ard.PUBLISH_RATE
         self.raven_joints = ard.RAVEN_JOINTS
         self.rc = [0, 0]
         self.rampup_count = np.array(self.rc)
         self.i = 0
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
-        self.man_steps = 4 # 30 * (ard.COMMAND_RATE / 1000)
+        self.man_steps = 10 # 30 * (ard.COMMAND_RATE / 1000)
 
         self.homed = [False, False]
         self.moved = [False, False]
@@ -331,7 +331,7 @@ class ambf_raven:
         if arm == 1:
             gangle = -gangle
         # tm[0, 3] *= -1
-        self.start_jp[arm] = self.next_jp[arm]
+        # self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] = np.matmul(delta_tm, self.curr_tm[arm])
 
         # update curr_dh
@@ -366,10 +366,7 @@ class ambf_raven:
             arm (int) : 0 for the left arm and 1 for the right arm
         """
         # Calculate delta jp
-        # for i in range(self.raven_joints):
-        #     self.start_jp[arm][i] = self.arms[arm].get_joint_pos(i)
-        #     self.delta_jp[arm][i] = self.next_jp[arm][i] - self.arms[arm].get_joint_pos(i)
-
+        self.start_jp[arm] = self.arms[arm].get_all_joint_pos()
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
 
 
@@ -421,7 +418,7 @@ class ambf_raven:
         for i in range(increments):
             self.moved[0] = self.move_increment(0, i, increments)
             self.moved[1] = self.move_increment(1, i, increments)
-            time.sleep(ard.COMMAND_TIME)
+            time.sleep(ard.PUBLISH_TIME)
 
     def move_now(self, arm):
         """

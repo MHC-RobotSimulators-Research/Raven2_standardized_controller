@@ -16,14 +16,11 @@ CAMERA_COUNT = 3
 RAVEN_JOINTS = 7
 RAVEN_ARMS   = 2
 RAVEN_IKSOLS = 8
-LOOP_RATE    = 1000
 PUBLISH_RATE = 1000
-COMMAND_RATE = 1000
 PUBLISH_TIME = 1 / PUBLISH_RATE
-COMMAND_TIME = 1 / COMMAND_RATE
 Eps          = sys.float_info.epsilon
 
-MAX_JR             = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad], dtype="float") / COMMAND_RATE
+MAX_JR             = np.array([5*Deg2Rad, 5*Deg2Rad, 0.02, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad, 15*Deg2Rad], dtype="float") / PUBLISH_RATE
 MAX_JOINTS         = np.array([90 * Deg2Rad, 135 * Deg2Rad, 0.56, m.pi, 2, (m.pi * 3)/4, (m.pi * 3)/4],  dtype = 'float')
 MIN_JOINTS         = np.array([0, 45 * Deg2Rad, 0.23, -m.pi, -2, 0, 0],  dtype = 'float')
 HOME_JOINTS        = np.array([m.pi / 6, m.pi / 2, 0.4, 0, 0, m.pi / 4, m.pi / 4], dtype='float')

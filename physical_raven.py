@@ -38,7 +38,7 @@ class physical_raven:
         self.curr_dh = prd.HOME_DH.copy()
 
         self.dance_scale_joints = prd.DANCE_SCALE_JOINTS
-        self.loop_rate = prd.LOOP_RATE
+        self.loop_rate = prd.PUBLISH_RATE
         self.raven_joints = prd.RAVEN_JOINTS
         self.rc = [0, 0]
         self.rampup_count = np.array(self.rc)
