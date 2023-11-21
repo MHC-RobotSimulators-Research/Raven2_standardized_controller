@@ -46,6 +46,7 @@ class ambf_raven:
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
         self.man_steps = 10 # 30 * (ard.COMMAND_RATE / 1000)
+        self.time_last_pub_move = time.time()
 
         self.homed = [False, False]
         self.moved = [False, False]
@@ -53,6 +54,7 @@ class ambf_raven:
         self.limited = [False, False]
 
         print("\nHoming...\n")
+        time.sleep(1)
         self.home_fast()
         print(self.curr_tm)
 
@@ -133,8 +135,8 @@ class ambf_raven:
             # apply offset to joint 4
             jpos[3] -= math.pi * 3 /4
             # convert jpos to degrees
-            for i in range(len(jpos)):
-                jpos[i] = jpos[i] * ard.Rad2Deg
+            # for i in range(len(jpos)):
+            #     jpos[i] = jpos[i] * ard.Rad2Deg
             jpos.insert(3, 0)
             status.extend(jpos)
             # status.extend(self.arms[i].get_all_joint_pos().insert(3, 0))  # 7 numbers
@@ -331,7 +333,7 @@ class ambf_raven:
         if arm == 1:
             gangle = -gangle
         # tm[0, 3] *= -1
-        # self.start_jp[arm] = self.next_jp[arm]
+        self.start_jp[arm] = self.next_jp[arm]
         self.curr_tm[arm] = np.matmul(delta_tm, self.curr_tm[arm])
 
         # update curr_dh
@@ -366,7 +368,7 @@ class ambf_raven:
             arm (int) : 0 for the left arm and 1 for the right arm
         """
         # Calculate delta jp
-        self.start_jp[arm] = self.arms[arm].get_all_joint_pos()
+        # self.start_jp[arm] = self.arms[arm].get_all_joint_pos()
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
 
 
@@ -416,9 +418,14 @@ class ambf_raven:
         # print("inc: ", increments)
 
         for i in range(increments):
+            interval_pub = time.time() - self.time_last_pub_move
+            # print(str(interval_pub)) # [debug]
+            if interval_pub < ard.PUBLISH_TIME:
+                time.sleep(ard.PUBLISH_TIME - interval_pub)  # If the time interval is too short, wait util do not exceed the max rate
+                # print('time sleep:' + str(self.min_interval_move-interval_pub)) #[debug]
+            self.time_last_pub_move = time.time()
             self.moved[0] = self.move_increment(0, i, increments)
             self.moved[1] = self.move_increment(1, i, increments)
-            time.sleep(ard.PUBLISH_TIME)
 
     def move_now(self, arm):
         """

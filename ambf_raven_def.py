@@ -23,7 +23,7 @@ Eps          = sys.float_info.epsilon
 MAX_JOINTS         = np.array([  m.pi,         m.pi,  0.10,            m.pi,   2, (m.pi * 3)/4, (m.pi * 3)/4],  dtype = 'float')
 MIN_JOINTS         = np.array([ -m.pi,        -m.pi, -0.17,           -m.pi,  -2,            0,            0],  dtype = 'float')
 # HOME_JOINTS        = np.array([m.pi / 6 + , m.pi / 2, 0.03090909, 0, 0, m.pi / 4, m.pi / 4],dtype = 'float')
-HOME_JOINTS        = np.array([m.pi/6, m.pi/2, -0.07,    (m.pi * 3)/4,   0,       m.pi/4,       m.pi/4],  dtype = 'float')
+HOME_JOINTS        = np.array([m.pi/6 + 5 * Deg2Rad, m.pi/2, -0.07,    (m.pi * 3)/4,   0,       m.pi/4,       m.pi/4],  dtype = 'float')
 HOME_DH            = np.array([[0.61086524, 1.57079633, -0.07,  2.35619449 - m.pi/2, 0., 0., 0.78539816],
                                [0.61086524, 1.57079633, -0.07,  2.35619449 - m.pi/2, 0., 0., 0.78539816]],
                                 dtype="float")

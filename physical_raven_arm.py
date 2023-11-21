@@ -262,12 +262,12 @@ class physical_raven_arm():
 
         interval_pub = time.time() - self.time_last_pub_move
         #print(str(interval_pub)) # [debug]
-        if (self.time_last_pub_move != -1.0) & (interval_pub < self.min_interval_move):
-            time.sleep(self.min_interval_move-interval_pub) # If the time interval is too short, wait util do not exceed the max rate
+        if (self.time_last_pub_move != -1.0) & (interval_pub < prd.PUBLISH_TIME):
+            time.sleep(prd.PUBLISH_TIME - interval_pub) # If the time interval is too short, wait util do not exceed the max rate
             #print('time sleep:' + str(self.min_interval_move-interval_pub)) #[debug]
+        self.time_last_pub_move = time.time()
         self.__publisher_servo_jr.publish(msg)
         #print("command sent!")
-        self.time_last_pub_move = time.time()
         self.pub_count_motion += 1
 
         #print('Command pub count: ' + str(self.pub_count_motion) + ' | msg: ' + str(joint_command)) # [debug]

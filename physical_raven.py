@@ -45,7 +45,7 @@ class physical_raven:
         self.i = 0
         self.speed = 10.00 / self.loop_rate
         self.rampup_speed = 0.5 / self.loop_rate
-        self.man_steps = 20 # 30 * (prd.COMMAND_RATE / 1000)
+        self.man_steps = 10 # 30 * (prd.COMMAND_RATE / 1000)
 
         self.homed = [False, False]
         self.moved = [False, False]
@@ -149,7 +149,7 @@ class physical_raven:
         idx_count = 1
 
         for index in range(0, 16):
-            status[0, idx_count] = ("%.6f" % msg.jpos[index])
+            status[0, idx_count] = ("%.6f" % msg.jpos[index]) * prd.Deg2Rad
             idx_count += 1
 
         status[0, idx_count] = ("%.6f" % msg.runlevel)
@@ -203,7 +203,7 @@ class physical_raven:
             idx_count += 1
 
         for index in range(0, 16):
-            status[0, idx_count] = ("%.6f" % msg.jvel[index])
+            status[0, idx_count] = ("%.6f" % msg.jvel[index]) * prd.Deg2Rad
             idx_count += 1
 
         for index in range(0, 16):
@@ -349,6 +349,7 @@ class physical_raven:
         """
         # update curr_tm
         self.curr_tm[arm] = np.matmul(delta_tm, self.curr_tm[arm])
+        self.start_jp[arm] = self.next_jp[arm]
 
         # update curr_dh
         if delta_dh is not None:
@@ -383,7 +384,7 @@ class physical_raven:
         Args:
             arm (int) : 0 for the left arm and 1 for the right arm
         """
-        self.start_jp[arm] = self.arms[arm].get_measured_jpos()
+        # self.start_jp[arm] = self.arms[arm].get_measured_jpos()
         self.delta_jp[arm] = self.next_jp[arm] - self.start_jp[arm]
         # print("arm", arm, " delta_jp: ", self.delta_jp[arm])
 

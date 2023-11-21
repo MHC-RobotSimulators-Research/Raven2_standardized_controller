@@ -48,6 +48,7 @@ DIV = 2000  # amount raw input values are divided by to produce motion
 ALLOW_FAKE_CONTROLLER = True
 RECORD = False
 RECORDING = False
+SHOW_TM = False
 FILE_OUT = ""
 FILE_IN = ""
 
@@ -190,6 +191,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
     global RECORD
     global RECORDING
     global FILE_OUT
+    global SHOW_TM
 
     # Sets which mode will be used in manual control
     arm_control = [True, True]
@@ -367,6 +369,11 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                 # rumble the controller when raven is limited
                 rumble_if_limited(raven, xbc)
 
+                if SHOW_TM:
+                    print("\nleft: \n", raven.curr_tm[0], "\nright: \n", raven.curr_tm[1])
+                    SHOW_TM = False
+
+
         while CONTROL[3] and not CONTROL[2]:
             '''
             File Mode:
@@ -465,6 +472,7 @@ def _get_input():
     global RECORD
     global FILE_OUT
     global FILE_IN
+    global SHOW_TM
 
     print_menu()
 
@@ -526,6 +534,9 @@ def _get_input():
             RECORD = False
             print("Recording stopped\n"
                   "Press a key to switch modes or press 'm' to show the menu")
+
+        elif userinput == 't' and CONTROL[2]:
+            SHOW_TM = True
 
 
 def file_loader():
