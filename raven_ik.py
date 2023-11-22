@@ -316,14 +316,14 @@ def dhvalue_to_joint(dhvalue, gangle, arm, raven_def):
 def apply_joint_limits(joint, raven_def):
     limited = False
     for i in range(raven_def.RAVEN_JOINTS):
-        if i != 2:
-            while joint[i] > m.pi:
-                joint[i] -= 2 * m.pi
-            while joint[i] < -m.pi:
-                joint[i] += 2 * m.pi
+        # if i != 2:
+        #     while joint[i] > m.pi:
+        #         joint[i] -= 2 * m.pi
+        #     while joint[i] < -m.pi:
+        #         joint[i] += 2 * m.pi
         if joint[i] < raven_def.RAVEN_JOINT_LIMITS[0][i]:
             joint[i] = raven_def.RAVEN_JOINT_LIMITS[0][i]
-            limted = True
+            limited = True
         elif joint[i] > raven_def.RAVEN_JOINT_LIMITS[1][i]:
             joint[i] = raven_def.RAVEN_JOINT_LIMITS[1][i]
             limited = True
