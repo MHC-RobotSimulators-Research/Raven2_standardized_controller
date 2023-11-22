@@ -149,7 +149,7 @@ class physical_raven:
         idx_count = 1
 
         for index in range(0, 16):
-            status[0, idx_count] = ("%.6f" % msg.jpos[index]) * prd.Deg2Rad
+            status[0, idx_count] = ("%.6f" % (msg.jpos[index] * prd.Deg2Rad))
             idx_count += 1
 
         status[0, idx_count] = ("%.6f" % msg.runlevel)
@@ -203,7 +203,7 @@ class physical_raven:
             idx_count += 1
 
         for index in range(0, 16):
-            status[0, idx_count] = ("%.6f" % msg.jvel[index]) * prd.Deg2Rad
+            status[0, idx_count] = float("%.6f" % (msg.jvel[index] * prd.Deg2Rad))
             idx_count += 1
 
         for index in range(0, 16):
@@ -354,14 +354,14 @@ class physical_raven:
         # update curr_dh
         if delta_dh is not None:
             if not arm:
-                if abs(self.curr_dh[0][3] - delta_dh[0][3] / 10) < math.pi:
+                if abs(self.curr_dh[0][3] + delta_dh[0][3]) < math.pi:
                     self.curr_dh[0][3] += delta_dh[0][3]
-                if abs(self.curr_dh[0][4] - delta_dh[0][4] / 10) < 2:
-                    self.curr_dh[0][4] += delta_dh[0][4]
+                if abs(self.curr_dh[0][4] - delta_dh[0][4]) < math.pi/2:
+                    self.curr_dh[0][4] -= delta_dh[0][4]
             else:
-                if abs(self.curr_dh[1][3] + delta_dh[1][3] / 10) < math.pi:
-                    self.curr_dh[1][3] += delta_dh[1][3]
-                if abs(self.curr_dh[1][4] + delta_dh[1][4] / 10) < 2:
+                if abs(self.curr_dh[1][3] - delta_dh[1][3]) < math.pi:
+                    self.curr_dh[1][3] -= delta_dh[1][3]
+                if abs(self.curr_dh[1][4] + delta_dh[1][4]) < math.pi/2:
                     self.curr_dh[1][4] += delta_dh[1][4]
 
         # generate new_jp
