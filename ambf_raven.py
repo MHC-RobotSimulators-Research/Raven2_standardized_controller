@@ -339,14 +339,14 @@ class ambf_raven:
         # update curr_dh
         if delta_dh is not None:
             if not arm:
-                if abs(self.curr_dh[0][3] - delta_dh[0][3] / 10) < math.pi:
+                if abs(self.curr_dh[0][3] + delta_dh[0][3]) < math.pi:
                     self.curr_dh[0][3] += delta_dh[0][3]
-                if abs(self.curr_dh[0][4] - delta_dh[0][4] / 10) < 2:
-                    self.curr_dh[0][4] += delta_dh[0][4]
+                if abs(self.curr_dh[0][4] - delta_dh[0][4]) < math.pi/2:
+                    self.curr_dh[0][4] -= delta_dh[0][4]
             else:
-                if abs(self.curr_dh[1][3] + delta_dh[1][3] / 10) < math.pi:
-                    self.curr_dh[1][3] += delta_dh[1][3]
-                if abs(self.curr_dh[1][4] + delta_dh[1][4] / 10) < 2:
+                if abs(self.curr_dh[1][3] - delta_dh[1][3]) < math.pi:
+                    self.curr_dh[1][3] -= delta_dh[1][3]
+                if abs(self.curr_dh[1][4] + delta_dh[1][4]) < math.pi/2:
                     self.curr_dh[1][4] += delta_dh[1][4]
 
         # generate new_jp
