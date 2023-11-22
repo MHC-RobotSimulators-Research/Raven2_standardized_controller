@@ -49,6 +49,7 @@ ALLOW_FAKE_CONTROLLER = True
 RECORD = False
 RECORDING = False
 SHOW_TM = False
+GRASPING = False
 FILE_OUT = ""
 FILE_IN = ""
 
@@ -84,7 +85,7 @@ def update_pos_two_arm(controller):
 
     # Update coordinates for both arms
     for arm in range(2):
-        if DEADZONE < m.sqrt(controller[arm][1] ** 2 + controller[arm][1] ** 2):
+        if DEADZONE < m.sqrt((controller[arm][0] ** 2) + (controller[arm][1] ** 2)):
             if controller[arm][3]:
                 delta_tm[arm][2, 3] = -controller[arm][1] / DIV
 
@@ -127,7 +128,7 @@ def update_pos_one_arm(controller, arm):
                        dtype="float")
 
     # Cartesian control of desired arm
-    if DEADZONE < m.sqrt(controller[0][1] ** 2 + controller[0][1] ** 2):
+    if DEADZONE < m.sqrt((controller[0][0] ** 2) + (controller[0][1] ** 2)):
         if controller[0][3]:
             delta_tm[arm][2, 3] = -controller[0][1] / DIV
         else:
@@ -192,6 +193,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
     global RECORDING
     global FILE_OUT
     global SHOW_TM
+    global GRASPING
 
     # Sets which mode will be used in manual control
     arm_control = [True, True]
@@ -337,7 +339,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                     raven.plan_move_abs(0, delta_tm[0], gangle[0], ik_mode)
                     raven.plan_move_abs(1, delta_tm[1], gangle[1], ik_mode)
 
-                    if not raven.get_raven_type():
+                    if not raven.get_raven_type() and GRASPING:
                         try:
                             for i in range(2):
                                 grasper.set_grasp(i, controller[i][2])
@@ -356,7 +358,7 @@ def do(ravens, xbc, grasper, recorder=None, reader=None):
                     # Plan new position based off of desired cartesian changes
                     raven.plan_move_abs(arm, delta_tm[arm], gangle[arm], True, delta_dh)
 
-                    if not raven.get_raven_type():
+                    if not raven.get_raven_type() and GRASPING:
                         try:
                             grasper.set_grasp(arm, controller[1][2])
                             grasper.grasp_object(arm)
