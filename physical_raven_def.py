@@ -25,8 +25,8 @@ MAX_JOINTS         = np.array([90 * Deg2Rad, 135 * Deg2Rad, 0.56, m.pi, 2, (m.pi
 MIN_JOINTS         = np.array([0, 45 * Deg2Rad, 0.23, -m.pi, -2, 0, 0],  dtype = 'float')
 HOME_JOINTS        = np.array([m.pi / 6, m.pi / 2, 0.4, 0, 0, m.pi / 4, m.pi / 4], dtype='float')
 # HOME_JOINTS        = np.array([0.5217216610908508, 1.5799641609191895, 0.40040287375450134, 0.06240818649530411, -0.006050971802324057, 0.7633852362632751, 0.7971110939979553],dtype = 'float')
-HOME_DH            = np.array([[0.52359878, 1.57079633, 0.4, 0. - m.pi/2, 0., 0., 0.78539816],
-                               [0.52359878, 1.57079633, 0.4, 0. - m.pi/2, 0., -0., 0.78539816]], dtype="float")
+HOME_DH            = np.array([[0.52359878, 1.57079633, 0.4, 0., 0., 0., 0.78539816],
+                               [0.52359878, 1.57079633, 0.4, 0., 0., -0., 0.78539816]], dtype="float")
 DANCE_SCALE_JOINTS = np.array([0.3, 0.3, 0.06, 0.3, 1.2, m.pi/6, m.pi/6],  dtype='float')
 
 RAVEN_JOINT_LIMITS = np.array([[0.0, m.pi/4, 0.23, -m.pi*2, -2, -2, -2],
